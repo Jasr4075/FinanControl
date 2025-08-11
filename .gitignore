@@ -24,4 +24,5 @@ tsconfig.tsbuildinfo
 .nuxt/
 # SvelteKit
 .svelte-kit/
-# Astro
+
+.env
