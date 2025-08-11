@@ -21,7 +21,7 @@ export class Parcela extends Model<
     declare numeroParcela: number
     declare valor: number
     declare dataVencimento: Date
-    declare faturaId: ForeignKey<string>
+    declare faturaId: ForeignKey<Fatura['id']> | null
     declare paga: boolean
     declare dataPagamento: Date | null
 }
@@ -69,12 +69,11 @@ Parcela.init(
             type: DataTypes.UUID,
             allowNull: true,
             references: {
-                model: 'faturas',
+                model: Fatura,
                 key: 'id',
             },
-            onDelete: 'SET NULL',
-            onUpdate: 'CASCADE',
-        },
+            field: 'fatura_id',
+        },        
         paga: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

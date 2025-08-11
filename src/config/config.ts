@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize'
 
 const requiredEnv = ['DB_NAME', 'DB_USER', 'DB_PASS', 'DB_HOST', 'DB_PORT'];
 requiredEnv.forEach((key) => {
-  if (!process.env[key]) throw new Error(`Variável de ambiente ${key} está faltando.`);
+  if (!process.env[key]) throw new Error(`Variavel de ambiente ${key} esta faltando.`);
 });
 
 const isProd = process.env.NODE_ENV === 'production';

@@ -17,7 +17,7 @@ export class Cashback extends Model<
     declare cartaoId: string
     declare quantidade: number
     declare description: string
-    declare despesa: string
+    declare despesaId: string
     declare creditDate: Date
 }
 
@@ -47,9 +47,15 @@ Cashback.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
-        despesa: {
-            type: DataTypes.STRING,
+        despesaId: {
+            type: DataTypes.UUID,
             allowNull: false,
+            references: {
+                model: 'despesas',
+                key: 'id'
+            },
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
         },
         creditDate: {
             type: DataTypes.DATE,
