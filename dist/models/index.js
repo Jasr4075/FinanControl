@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+require("./Usuario");
+require("./Conta");
+require("./Cartao");
+require("./Despesa");
+require("./Fatura");
+require("./Parcela");
+require("./Category");
+require("./Cashback");
+require("./Transferencia");
+require("./Receita");
+require("./Meta");
+require("./Setting");
+require("./Notificacao");
+require("./TransacoesRecorrentes");

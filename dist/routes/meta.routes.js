@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const MetaController_1 = require("../controllers/MetaController");
+const router = (0, express_1.Router)();
+router.post('/', MetaController_1.createMeta);
+router.get('/', MetaController_1.getMetas);
+router.get('/:id', MetaController_1.getMetaById);
+router.put('/:id', MetaController_1.updateMeta);
+router.delete('/:id', MetaController_1.deleteMeta);
+exports.default = router;

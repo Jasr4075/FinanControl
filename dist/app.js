@@ -5,5 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
 const express_1 = __importDefault(require("express"));
+const database_1 = require("./database");
+const routes_1 = __importDefault(require("./routes"));
 const app = (0, express_1.default)();
+app.use(express_1.default.json());
+app.use('/api', routes_1.default);
+(0, database_1.initDatabase)();
 exports.default = app;
