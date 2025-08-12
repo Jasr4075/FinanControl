@@ -55,7 +55,7 @@ Despesa.init({
         allowNull: false,
     },
     metodoPagamento: {
-        type: sequelize_1.DataTypes.ENUM('PIX', 'Crédito', 'Débito', 'Dinheiro'),
+        type: sequelize_1.DataTypes.ENUM('PIX', 'CREDITO', 'DEBITO', 'DINHERO'),
         allowNull: false,
     },
     data: {

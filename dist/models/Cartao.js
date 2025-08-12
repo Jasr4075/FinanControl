@@ -39,7 +39,7 @@ Cartao.init({
         allowNull: false,
     },
     type: {
-        type: sequelize_1.DataTypes.ENUM('Crédito', 'Débito', 'Misto'),
+        type: sequelize_1.DataTypes.ENUM('CREDITO', 'DEBITO', 'MISTO'),
         allowNull: false,
     },
     creditLimit: {

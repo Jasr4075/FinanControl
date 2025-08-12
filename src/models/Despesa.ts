@@ -23,7 +23,7 @@ export class Despesa extends Model<
     declare cartaoId: ForeignKey<string>
     declare descricao: string
     declare valor: number
-    declare metodoPagamento: 'PIX' | 'Crédito' | 'Débito' | 'Dinheiro'
+    declare metodoPagamento: 'PIX' | 'CREDITO' | 'DEBITO' | 'DINHERO'
     declare data: Date
     declare parcelado: boolean
     declare numeroParcelas: number
@@ -77,7 +77,7 @@ Despesa.init(
             allowNull: false,
         },
         metodoPagamento: {
-            type: DataTypes.ENUM('PIX', 'Crédito', 'Débito', 'Dinheiro'),
+            type: DataTypes.ENUM('PIX', 'CREDITO', 'DEBITO', 'DINHERO'),
             allowNull: false,
         },
         data: {

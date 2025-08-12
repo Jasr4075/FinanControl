@@ -18,7 +18,7 @@ export class Cartao extends Model<
     declare userId: ForeignKey<string>
     declare contaId: ForeignKey<string>
     declare nome: string
-    declare type: 'Crédito' | 'Débito' | 'Misto'
+    declare type: 'CREDITO' | 'DEBITO' | 'MISTO'
     declare creditLimit: number
     declare hasCashback: boolean
     declare cashbackPercent: number
@@ -59,7 +59,7 @@ Cartao.init(
             allowNull: false,
         },
         type: {
-            type: DataTypes.ENUM('Crédito', 'Débito', 'Misto'),
+            type: DataTypes.ENUM('CREDITO', 'DEBITO', 'MISTO'),
             allowNull: false,
         },
         creditLimit: {

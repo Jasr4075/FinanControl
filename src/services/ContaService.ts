@@ -9,7 +9,7 @@ export class ContaService {
   // Cria uma nova conta validando campos obrigatórios e usando defaults
   static async create(data: {
     userId: string
-    type: 'Corrente' | 'Poupança' | 'Efetivo'
+    type: 'CORRENTE' | 'POUPANCA' | 'EFETIVO'
     bancoNome: string
     agencia: string
     conta: string
@@ -51,7 +51,7 @@ export class ContaService {
 
   // Atualiza conta por ID, retornando conta atualizada com usuário
   static async update(id: string, data: Partial<{
-    type: 'Corrente' | 'Poupança' | 'Efetivo'
+    type: 'CORRENTE' | 'POUPANCA' | 'EFETIVO'
     bancoNome: string
     agencia: string
     conta: string

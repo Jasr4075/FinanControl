@@ -24,7 +24,7 @@ Conta.init({
         onUpdate: 'CASCADE',
     },
     type: {
-        type: sequelize_1.DataTypes.ENUM('Corrente', 'Poupança', 'Efetivo'),
+        type: sequelize_1.DataTypes.ENUM('CORRENTE', 'POUPANCA', 'EFETIVO'),
         allowNull: false,
     },
     bancoNome: {

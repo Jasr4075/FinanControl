@@ -8,12 +8,11 @@ const includeRelations = [
 ]
 
 export class CartaoService {
-  // Cria um cartão validando campos obrigatórios e aplicando defaults
   static async create(data: {
     userId: string
     contaId: string
     nome: string
-    type: 'Crédito' | 'Débito' | 'Misto'
+    type: 'CREDITO' | 'DEBITO' | 'MISTO'
     creditLimit?: number
     hasCashback?: boolean
     cashbackPercent?: number
@@ -67,7 +66,7 @@ export class CartaoService {
   // Atualiza cartão por ID e retorna atualizado com relações
   static async update(id: string, data: Partial<{
     nome: string
-    type: 'Crédito' | 'Débito' | 'Misto'
+    type: 'CREDITO' | 'DEBITO' | 'MISTO'
     creditLimit: number
     hasCashback: boolean
     cashbackPercent: number

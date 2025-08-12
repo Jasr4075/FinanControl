@@ -2,7 +2,13 @@ import { Request, Response } from 'express'
 import { CategoryService } from '../services/CategoryService'
 
 export const createCategory = async (req: Request, res: Response) => {
-  try {
+  const { name } = req.body
+  
+    try {
+      if (!name) {
+      return res.status(400).json({ success: false, message: 'Nome da categoria é obrigatório.' })
+    }
+
     const category = await CategoryService.create(req.body.name)
     res.status(201).json({ success: true, data: category })
   } catch (error: any) {

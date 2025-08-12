@@ -12,7 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteCategory = exports.updateCategory = exports.getCategoryById = exports.getCategories = exports.createCategory = void 0;
 const CategoryService_1 = require("../services/CategoryService");
 const createCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { name } = req.body;
     try {
+        if (!name) {
+            return res.status(400).json({ success: false, message: 'Nome da categoria é obrigatório.' });
+        }
         const category = yield CategoryService_1.CategoryService.create(req.body.name);
         res.status(201).json({ success: true, data: category });
     }

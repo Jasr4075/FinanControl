@@ -15,7 +15,7 @@ export class Conta extends Model<
 > {
     declare id: CreationOptional<string>
     declare userId: ForeignKey<string>
-    declare type: 'Corrente' | 'Poupança' | 'Efetivo'
+    declare type: 'CORRENTE' | 'POUPANCA' | 'EFETIVO'
     declare bancoNome: string
     declare agencia: string
     declare conta: string
@@ -42,7 +42,7 @@ Conta.init(
             onUpdate: 'CASCADE',
         },
         type: {
-            type: DataTypes.ENUM('Corrente', 'Poupança', 'Efetivo'),
+            type: DataTypes.ENUM('CORRENTE', 'POUPANCA', 'EFETIVO'),
             allowNull: false,
         },
         bancoNome: {

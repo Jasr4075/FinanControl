@@ -18,7 +18,6 @@ const includeRelations = [
     { model: Conta_1.Conta, as: 'conta', attributes: ['id', 'bancoNome', 'agencia', 'conta'] },
 ];
 class CartaoService {
-    // Cria um cartão validando campos obrigatórios e aplicando defaults
     static create(data) {
         return __awaiter(this, void 0, void 0, function* () {
             const { userId, contaId, nome, type, creditLimit = 0, hasCashback = false, cashbackPercent = 0, closingDay, dueDay, active = true, } = data;
