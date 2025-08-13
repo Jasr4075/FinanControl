@@ -5,7 +5,6 @@ export const initDatabase = async (): Promise<void> => {
     await sequelize.authenticate()
     console.log('🔌 Conexão com o banco estabelecida com sucesso.')
 
-    // Agora sim: modelos já estão registrados, pode sincronizar
     await sequelize.sync({ alter: true })
     console.log('📦 Sincronização com o banco finalizada.')
 

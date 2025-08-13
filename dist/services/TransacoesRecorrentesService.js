@@ -21,19 +21,15 @@ class TransacoesRecorrentesService {
     static create(data) {
         return __awaiter(this, void 0, void 0, function* () {
             const { userId, type, amount, descricao, frequencia, dataInicio, dataFinal, active, categoryId } = data;
-            // Validação obrigatória
             if (!userId || !type || !amount || !descricao || !frequencia || !dataInicio || !categoryId) {
                 throw new Error('Campos obrigatórios não preenchidos.');
             }
-            // Validação do tipo
             if (!['Despesa', 'Receita'].includes(type)) {
                 throw new Error('Tipo inválido, use "Despesa" ou "Receita"');
             }
-            // Validação da frequência
             if (!['diario', 'semanal', 'mensal'].includes(frequencia)) {
                 throw new Error('Frequência inválida, use "diario", "semanal" ou "mensal"');
             }
-            // Criação
             const novaTransacao = yield TransacoesRecorrentes_1.TransacoesRecorrentes.create({
                 dataFinal: dataFinal !== null && dataFinal !== void 0 ? dataFinal : null,
                 active: active !== null && active !== void 0 ? active : true,
@@ -45,7 +41,6 @@ class TransacoesRecorrentesService {
                 dataInicio,
                 categoryId
             });
-            // Retorna com as relações
             return yield TransacoesRecorrentes_1.TransacoesRecorrentes.findByPk(novaTransacao.id, { include: includeRelations });
         });
     }

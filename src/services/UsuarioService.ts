@@ -33,20 +33,17 @@ export class UsuarioService {
     return this.sanitizeUser(usuario)
   }
 
-  // Busca todos os usuários
   static async findAll() {
     const usuarios = await Usuario.findAll()
     return usuarios.map(this.sanitizeUser)
   }
 
-  // Busca usuário por ID
   static async findById(id: string) {
     const usuario = await Usuario.findByPk(id)
     if (!usuario) return null
     return this.sanitizeUser(usuario)
   }
 
-  // Atualiza usuário por ID, tratando a senha para hash
   static async update(
     id: string,
     data: {
@@ -71,7 +68,6 @@ export class UsuarioService {
     return this.sanitizeUser(usuario)
   }
 
-  // Deleta usuário por ID
   static async delete(id: string) {
     const usuario = await Usuario.findByPk(id)
     if (!usuario) throw new Error('Usuário não encontrado')

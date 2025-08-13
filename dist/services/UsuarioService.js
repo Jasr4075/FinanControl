@@ -38,14 +38,12 @@ class UsuarioService {
             return this.sanitizeUser(usuario);
         });
     }
-    // Busca todos os usuários
     static findAll() {
         return __awaiter(this, void 0, void 0, function* () {
             const usuarios = yield Usuario_1.Usuario.findAll();
             return usuarios.map(this.sanitizeUser);
         });
     }
-    // Busca usuário por ID
     static findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const usuario = yield Usuario_1.Usuario.findByPk(id);
@@ -54,7 +52,6 @@ class UsuarioService {
             return this.sanitizeUser(usuario);
         });
     }
-    // Atualiza usuário por ID, tratando a senha para hash
     static update(id, data) {
         return __awaiter(this, void 0, void 0, function* () {
             const usuario = yield Usuario_1.Usuario.findByPk(id);
@@ -69,7 +66,6 @@ class UsuarioService {
             return this.sanitizeUser(usuario);
         });
     }
-    // Deleta usuário por ID
     static delete(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const usuario = yield Usuario_1.Usuario.findByPk(id);

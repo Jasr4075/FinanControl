@@ -16,11 +16,9 @@ const includeRelations = [
     { model: Usuario_1.Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
 ];
 class ContaService {
-    // Cria uma nova conta validando campos obrigatórios e usando defaults
     static create(data) {
         return __awaiter(this, void 0, void 0, function* () {
             const { userId, type, bancoNome, agencia, conta, saldo = 0, efetivo = false, cdiPercent = 0 } = data;
-            // Validação simples, poderia ser expandida
             if (!userId || !type || !bancoNome || !agencia || !conta) {
                 throw new Error('Campos obrigatórios não preenchidos.');
             }
@@ -34,23 +32,19 @@ class ContaService {
                 efetivo,
                 cdiPercent,
             });
-            // Retorna conta com dados do usuário relacionado
             return yield Conta_1.Conta.findByPk(novaConta.id, { include: includeRelations });
         });
     }
-    // Retorna todas as contas com os usuários relacionados
     static findAll() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield Conta_1.Conta.findAll({ include: includeRelations });
         });
     }
-    // Busca conta por ID com usuário relacionado
     static findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield Conta_1.Conta.findByPk(id, { include: includeRelations });
         });
     }
-    // Atualiza conta por ID, retornando conta atualizada com usuário
     static update(id, data) {
         return __awaiter(this, void 0, void 0, function* () {
             const conta = yield Conta_1.Conta.findByPk(id);
@@ -60,7 +54,6 @@ class ContaService {
             return yield Conta_1.Conta.findByPk(id, { include: includeRelations });
         });
     }
-    // Exclui conta por ID
     static delete(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const conta = yield Conta_1.Conta.findByPk(id);

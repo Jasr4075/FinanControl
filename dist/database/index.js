@@ -17,7 +17,6 @@ const initDatabase = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield config_1.sequelize.authenticate();
         console.log('🔌 Conexão com o banco estabelecida com sucesso.');
-        // Agora sim: modelos já estão registrados, pode sincronizar
         yield config_1.sequelize.sync({ alter: true });
         console.log('📦 Sincronização com o banco finalizada.');
     }

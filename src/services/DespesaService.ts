@@ -1,4 +1,3 @@
-// src/services/DespesaService.ts
 import { Despesa } from '../models/Despesa'
 import { Usuario } from '../models/Usuario'
 import { Conta } from '../models/Conta'
@@ -20,12 +19,10 @@ export class DespesaService {
       parcelado, numeroParcelas, juros, observacoes
     } = data
 
-    // Regra 1: Campos obrigatórios
     if (!userId || !categoryId || !descricao || !valor || !metodoPagamento || !dataDespesa) {
       throw new Error('Campos obrigatórios não preenchidos.')
     }
 
-    // Regra 2: Criar a despesa
     const novaDespesa = await Despesa.create({
       userId,
       contaId,
@@ -41,7 +38,6 @@ export class DespesaService {
       observacoes
     })
 
-    // Regra 3: Retornar já com as relações carregadas
     return await Despesa.findByPk(novaDespesa.id, { include: includeRelations })
   }
 

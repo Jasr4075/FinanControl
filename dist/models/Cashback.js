@@ -66,9 +66,9 @@ Cashback.belongsTo(Despesa_1.Despesa, {
 });
 Cartao_1.Cartao.hasMany(Cashback, {
     foreignKey: 'cartaoId',
-    as: 'cartoes',
+    as: 'cartao',
 });
 Cashback.belongsTo(Cartao_1.Cartao, {
     foreignKey: 'cartaoId',
-    as: 'cartoes',
+    as: 'cartao',
 });

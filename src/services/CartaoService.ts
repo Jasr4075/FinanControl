@@ -53,17 +53,14 @@ export class CartaoService {
     return await Cartao.findByPk(novoCartao.id, { include: includeRelations })
   }
 
-  // Retorna todos os cartões com relações
   static async findAll() {
     return await Cartao.findAll({ include: includeRelations })
   }
 
-  // Busca cartão por ID com relações
   static async findById(id: string) {
     return await Cartao.findByPk(id, { include: includeRelations })
   }
 
-  // Atualiza cartão por ID e retorna atualizado com relações
   static async update(id: string, data: Partial<{
     nome: string
     type: 'CREDITO' | 'DEBITO' | 'MISTO'
@@ -81,7 +78,6 @@ export class CartaoService {
     return await Cartao.findByPk(id, { include: includeRelations })
   }
 
-  // Remove cartão por ID
   static async delete(id: string) {
     const cartao = await Cartao.findByPk(id)
     if (!cartao) throw new Error('Cartão não encontrado.')

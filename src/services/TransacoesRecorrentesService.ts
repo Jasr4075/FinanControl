@@ -31,22 +31,18 @@ export class TransacoesRecorrentesService {
       categoryId
     } = data
 
-    // Validação obrigatória
     if (!userId || !type || !amount || !descricao || !frequencia || !dataInicio || !categoryId) {
       throw new Error('Campos obrigatórios não preenchidos.')
     }
 
-    // Validação do tipo
     if (!['Despesa', 'Receita'].includes(type)) {
       throw new Error('Tipo inválido, use "Despesa" ou "Receita"')
     }
 
-    // Validação da frequência
     if (!['diario', 'semanal', 'mensal'].includes(frequencia)) {
       throw new Error('Frequência inválida, use "diario", "semanal" ou "mensal"')
     }
 
-    // Criação
     const novaTransacao = await TransacoesRecorrentes.create({
       dataFinal: dataFinal ?? null,
       active: active ?? true,
@@ -59,7 +55,6 @@ export class TransacoesRecorrentesService {
       categoryId
     })
 
-    // Retorna com as relações
     return await TransacoesRecorrentes.findByPk(novaTransacao.id, { include: includeRelations })
   }
 

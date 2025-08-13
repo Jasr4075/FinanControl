@@ -39,19 +39,16 @@ class CartaoService {
             return yield Cartao_1.Cartao.findByPk(novoCartao.id, { include: includeRelations });
         });
     }
-    // Retorna todos os cartões com relações
     static findAll() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield Cartao_1.Cartao.findAll({ include: includeRelations });
         });
     }
-    // Busca cartão por ID com relações
     static findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield Cartao_1.Cartao.findByPk(id, { include: includeRelations });
         });
     }
-    // Atualiza cartão por ID e retorna atualizado com relações
     static update(id, data) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartao = yield Cartao_1.Cartao.findByPk(id);
@@ -61,7 +58,6 @@ class CartaoService {
             return yield Cartao_1.Cartao.findByPk(id, { include: includeRelations });
         });
     }
-    // Remove cartão por ID
     static delete(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartao = yield Cartao_1.Cartao.findByPk(id);
