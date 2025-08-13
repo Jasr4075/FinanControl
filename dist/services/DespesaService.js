@@ -18,9 +18,9 @@ const Cartao_1 = require("../models/Cartao");
 const Category_1 = require("../models/Category");
 const includeRelations = [
     { model: Usuario_1.Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
-    { model: Conta_1.Conta, as: 'conta', attributes: ['id', 'nome'] },
+    { model: Conta_1.Conta, as: 'conta', attributes: ['id', 'bancoNome'] },
     { model: Cartao_1.Cartao, as: 'cartao', attributes: ['id', 'nome'] },
-    { model: Category_1.Category, as: 'categoria', attributes: ['id', 'nome'] },
+    { model: Category_1.Category, as: 'categoria', attributes: ['id', 'name'] },
 ];
 class DespesaService {
     static create(data) {

@@ -7,9 +7,9 @@ import { Category } from '../models/Category'
 
 const includeRelations = [
   { model: Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
-  { model: Conta, as: 'conta', attributes: ['id', 'nome'] },
+  { model: Conta, as: 'conta', attributes: ['id', 'bancoNome'] },
   { model: Cartao, as: 'cartao', attributes: ['id', 'nome'] },
-  { model: Category, as: 'categoria', attributes: ['id', 'nome'] },
+  { model: Category, as: 'categoria', attributes: ['id', 'name'] },
 ]
 
 export class DespesaService {
