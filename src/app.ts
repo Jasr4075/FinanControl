@@ -9,6 +9,12 @@ app.use(express.json())
 
 app.use('/api', router)
 
+app.use((req, _res, next) => {
+    console.log('Método:', req.method, 'URL:', req.originalUrl);
+    next();
+  });
+  
+
 initDatabase()
 
 export default app

@@ -10,5 +10,9 @@ const routes_1 = __importDefault(require("./routes"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use('/api', routes_1.default);
+app.use((req, _res, next) => {
+    console.log('Método:', req.method, 'URL:', req.originalUrl);
+    next();
+});
 (0, database_1.initDatabase)();
 exports.default = app;
