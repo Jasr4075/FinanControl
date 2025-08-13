@@ -1,26 +1,33 @@
 import { Usuario } from '../models/Usuario'
 import bcrypt from 'bcrypt'
-import { usuarioCreateSchema, usuarioUpdateSchema, UsuarioCreateDTO, UsuarioUpdateDTO } from '../validators/usuario.schema'
 
 export class UsuarioService {
+  // Remove campo hash antes de enviar para o cliente
   static sanitizeUser(usuario: Usuario) {
     const userData = usuario.toJSON() as any
     delete userData.hash
     return userData
   }
 
-  static async create(data: UsuarioCreateDTO) {
-    const parsed = usuarioCreateSchema.parse(data)
-
-    const hash = await bcrypt.hash(parsed.senha, 10)
+  // Cria um usuário com senha criptografada
+  static async create(data: {
+    nome: string
+    email: string
+    telefone: string
+    username: string
+    senha: string
+    role?: 'ADMIN' | 'CLIENT'
+  }) {
+    const { nome, email, telefone, username, senha, role = 'CLIENT' } = data
+    const hash = await bcrypt.hash(senha, 10)
 
     const usuario = await Usuario.create({
-      nome: parsed.nome,
-      email: parsed.email,
-      telefone: parsed.telefone,
-      username: parsed.username,
+      nome,
+      email,
+      telefone,
+      username,
       hash,
-      role: parsed.role ?? 'CLIENT',
+      role,
     })
 
     return this.sanitizeUser(usuario)
@@ -37,15 +44,23 @@ export class UsuarioService {
     return this.sanitizeUser(usuario)
   }
 
-  static async update(id: string, data: UsuarioUpdateDTO) {
-    const parsed = usuarioUpdateSchema.parse(data)
-
+  static async update(
+    id: string,
+    data: {
+      nome?: string
+      email?: string
+      telefone?: string
+      username?: string
+      senha?: string
+      role?: 'ADMIN' | 'CLIENT'
+    }
+  ) {
     const usuario = await Usuario.findByPk(id)
     if (!usuario) throw new Error('Usuário não encontrado')
 
-    const updateData: any = { ...parsed }
-    if (parsed.senha) {
-      updateData.hash = await bcrypt.hash(parsed.senha, 10)
+    const updateData: any = { ...data }
+    if (data.senha) {
+      updateData.hash = await bcrypt.hash(data.senha, 10)
       delete updateData.senha
     }
 
