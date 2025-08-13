@@ -15,25 +15,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsuarioService = void 0;
 const Usuario_1 = require("../models/Usuario");
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const usuario_schema_1 = require("../validators/usuario.schema");
 class UsuarioService {
-    // Remove campo hash antes de enviar para o cliente
     static sanitizeUser(usuario) {
         const userData = usuario.toJSON();
         delete userData.hash;
         return userData;
     }
-    // Cria um usuário com senha criptografada
     static create(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { nome, email, telefone, username, senha, role = 'CLIENT' } = data;
-            const hash = yield bcrypt_1.default.hash(senha, 10);
+            var _a;
+            const parsed = usuario_schema_1.usuarioCreateSchema.parse(data);
+            const hash = yield bcrypt_1.default.hash(parsed.senha, 10);
             const usuario = yield Usuario_1.Usuario.create({
-                nome,
-                email,
-                telefone,
-                username,
+                nome: parsed.nome,
+                email: parsed.email,
+                telefone: parsed.telefone,
+                username: parsed.username,
                 hash,
-                role,
+                role: (_a = parsed.role) !== null && _a !== void 0 ? _a : 'CLIENT',
             });
             return this.sanitizeUser(usuario);
         });
@@ -54,12 +54,13 @@ class UsuarioService {
     }
     static update(id, data) {
         return __awaiter(this, void 0, void 0, function* () {
+            const parsed = usuario_schema_1.usuarioUpdateSchema.parse(data);
             const usuario = yield Usuario_1.Usuario.findByPk(id);
             if (!usuario)
                 throw new Error('Usuário não encontrado');
-            const updateData = Object.assign({}, data);
-            if (data.senha) {
-                updateData.hash = yield bcrypt_1.default.hash(data.senha, 10);
+            const updateData = Object.assign({}, parsed);
+            if (parsed.senha) {
+                updateData.hash = yield bcrypt_1.default.hash(parsed.senha, 10);
                 delete updateData.senha;
             }
             yield usuario.update(updateData);
