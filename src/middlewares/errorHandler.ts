@@ -15,11 +15,36 @@ export class AppError extends Error {
 export function errorHandler(err: any, req: Request, res: Response, _next: NextFunction) {
   console.error('🔥 Erro capturado pelo middleware:', err);
 
-  const statusCode = err.statusCode || 500;
-  const message = err.message || 'Erro interno do servidor.';
+  let statusCode = err.statusCode || 500;
+  let message = err.message || 'Erro interno do servidor.';
+  let detalhes = err.detalhes;
 
-  res.status(statusCode).json({
-    erro: message,
-    detalhes: err.detalhes || undefined,
-  });
+  // Sequelize ValidationError
+  if (err.name === 'SequelizeValidationError') {
+    statusCode = 400;
+    message = 'Erro de validação';
+    detalhes = err.errors.map((e: any) => ({
+      campo: e.path,
+      mensagem: e.message,
+    }));
+  }
+
+  // Sequelize Unique Constraint Error
+  if (err.name === 'SequelizeUniqueConstraintError') {
+    statusCode = 400;
+    message = 'Erro de validação';
+    detalhes = err.errors.map((e: any) => {
+      let campo = e.path;
+      let msg = 'Já está em uso';
+
+      // Opcional: personalizar mensaje según campo
+      if (campo === 'email') msg = 'Email já está em uso';
+      if (campo === 'username') msg = 'Username já está em uso';
+      if (campo === 'telefone') msg = 'Telefone já está em uso';
+
+      return { campo, mensagem: msg };
+    });
+  }
+
+  res.status(statusCode).json({ erro: message, detalhes });
 }
