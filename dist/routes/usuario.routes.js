@@ -2,10 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const UsuarioController_1 = require("../controllers/UsuarioController");
+const validate_1 = require("../middlewares/validate");
+const usuario_schema_1 = require("../validators/usuario.schema");
 const router = (0, express_1.Router)();
-router.post('/', UsuarioController_1.createUsuario);
+router.post('/', (0, validate_1.validate)(usuario_schema_1.usuarioCreateSchema), UsuarioController_1.createUsuario);
 router.get('/', UsuarioController_1.getUsuarios);
 router.get('/:id', UsuarioController_1.getUsuarioById);
-router.put('/:id', UsuarioController_1.updateUsuario);
+router.put('/:id', (0, validate_1.validate)(usuario_schema_1.usuarioUpdateSchema), UsuarioController_1.updateUsuario);
 router.delete('/:id', UsuarioController_1.deleteUsuario);
 exports.default = router;

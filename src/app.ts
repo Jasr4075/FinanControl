@@ -2,6 +2,8 @@ import 'dotenv/config'
 import express from 'express'
 import { initDatabase } from './database'
 import router from './routes'
+import { errorHandler } from './middlewares/errorHandler'
+
 
 const app = express()
 
@@ -19,12 +21,9 @@ if (process.env.NODE_ENV === 'development') {
   })
 }
 
-app.use((req, _res, next) => {
-    console.log('Método:', req.method, 'URL:', req.originalUrl);
-    next();
-  });
-  
-
 initDatabase()
+
+app.use(errorHandler);
+
 
 export default app

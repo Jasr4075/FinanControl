@@ -11,70 +11,53 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUsuario = exports.updateUsuario = exports.getUsuarioById = exports.getUsuarios = exports.createUsuario = void 0;
 const UsuarioService_1 = require("../services/UsuarioService");
-const createUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { nome, email, telefone, username, senha, role } = req.body;
+const createUsuario = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!nome || !email || !telefone || !username || !senha) {
-            return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
-        }
-        const usuario = yield UsuarioService_1.UsuarioService.create({ nome, email, telefone, username, senha, role });
+        const usuario = yield UsuarioService_1.UsuarioService.create(req.body);
         res.status(201).json({ success: true, data: usuario });
     }
-    catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+    catch (err) {
+        next(err);
     }
 });
 exports.createUsuario = createUsuario;
-const getUsuarios = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getUsuarios = (_req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const usuarios = yield UsuarioService_1.UsuarioService.findAll();
         res.status(200).json({ success: true, data: usuarios });
     }
-    catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+    catch (err) {
+        next(err);
     }
 });
 exports.getUsuarios = getUsuarios;
-const getUsuarioById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
+const getUsuarioById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const usuario = yield UsuarioService_1.UsuarioService.findById(id);
-        if (!usuario) {
-            return res.status(404).json({ success: false, message: 'Usuário não encontrado.' });
-        }
+        const usuario = yield UsuarioService_1.UsuarioService.findById(req.params.id);
         res.status(200).json({ success: true, data: usuario });
     }
-    catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+    catch (err) {
+        next(err);
     }
 });
 exports.getUsuarioById = getUsuarioById;
-const updateUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    const { nome, email, telefone, username, senha, role } = req.body;
+const updateUsuario = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const usuario = yield UsuarioService_1.UsuarioService.update(id, { nome, email, telefone, username, senha, role });
+        const usuario = yield UsuarioService_1.UsuarioService.update(req.params.id, req.body);
         res.status(200).json({ success: true, data: usuario });
     }
-    catch (error) {
-        if (error.message === 'Usuário não encontrado') {
-            return res.status(404).json({ success: false, message: error.message });
-        }
-        res.status(400).json({ success: false, message: error.message });
+    catch (err) {
+        next(err);
     }
 });
 exports.updateUsuario = updateUsuario;
-const deleteUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
+const deleteUsuario = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield UsuarioService_1.UsuarioService.delete(id);
+        yield UsuarioService_1.UsuarioService.delete(req.params.id);
         res.status(200).json({ success: true, message: 'Usuário excluído com sucesso.' });
     }
-    catch (error) {
-        if (error.message === 'Usuário não encontrado') {
-            return res.status(404).json({ success: false, message: error.message });
-        }
-        res.status(500).json({ success: false, message: error.message });
+    catch (err) {
+        next(err);
     }
 });
 exports.deleteUsuario = deleteUsuario;

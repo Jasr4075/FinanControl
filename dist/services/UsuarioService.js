@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsuarioService = void 0;
 const Usuario_1 = require("../models/Usuario");
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const errorHandler_1 = require("../middlewares/errorHandler");
 class UsuarioService {
     // Remove campo hash antes de enviar para o cliente
     static sanitizeUser(usuario) {
@@ -48,7 +49,7 @@ class UsuarioService {
         return __awaiter(this, void 0, void 0, function* () {
             const usuario = yield Usuario_1.Usuario.findByPk(id);
             if (!usuario)
-                return null;
+                throw new errorHandler_1.AppError('Usuário não encontrado.', 404);
             return this.sanitizeUser(usuario);
         });
     }
@@ -56,7 +57,7 @@ class UsuarioService {
         return __awaiter(this, void 0, void 0, function* () {
             const usuario = yield Usuario_1.Usuario.findByPk(id);
             if (!usuario)
-                throw new Error('Usuário não encontrado');
+                throw new errorHandler_1.AppError('Usuário não encontrado.', 404);
             const updateData = Object.assign({}, data);
             if (data.senha) {
                 updateData.hash = yield bcrypt_1.default.hash(data.senha, 10);
@@ -70,7 +71,7 @@ class UsuarioService {
         return __awaiter(this, void 0, void 0, function* () {
             const usuario = yield Usuario_1.Usuario.findByPk(id);
             if (!usuario)
-                throw new Error('Usuário não encontrado');
+                throw new errorHandler_1.AppError('Usuário não encontrado.', 404);
             yield usuario.destroy();
         });
     }

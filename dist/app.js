@@ -7,6 +7,7 @@ require("dotenv/config");
 const express_1 = __importDefault(require("express"));
 const database_1 = require("./database");
 const routes_1 = __importDefault(require("./routes"));
+const errorHandler_1 = require("./middlewares/errorHandler");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use('/api', routes_1.default);
@@ -19,9 +20,6 @@ if (process.env.NODE_ENV === 'development') {
         next();
     });
 }
-app.use((req, _res, next) => {
-    console.log('Método:', req.method, 'URL:', req.originalUrl);
-    next();
-});
 (0, database_1.initDatabase)();
+app.use(errorHandler_1.errorHandler);
 exports.default = app;
