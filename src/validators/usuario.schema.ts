@@ -22,9 +22,6 @@ export const usuarioCreateSchema = z.object({
         .min(6, 'Senha deve ter pelo menos 6 caracteres')
         .transform(senha => senha.trim()),
 
-    role: z.union([z.literal('ADMIN'), z.literal('CLIENT')], {
-        message: 'Role inválido',
-    })
 });
 
 export type UsuarioCreateDTO = z.infer<typeof usuarioCreateSchema>;
@@ -54,10 +51,6 @@ export const usuarioUpdateSchema = z.object({
         .min(6, 'Senha deve ter pelo menos 6 caracteres')
         .optional()
         .transform(senha => senha?.trim()),
-
-    role: z.union([z.literal('ADMIN'), z.literal('CLIENT')], {
-        message: 'Role inválido',
-    }).optional()
 });
 
 export type UsuarioUpdateDTO = z.infer<typeof usuarioUpdateSchema>;
