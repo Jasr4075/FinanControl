@@ -13,6 +13,8 @@ import transacoesRecorrentesRoutes from './transacoesRecorrentes.routes';
 import transferenciaRoutes from './transferencia.routes';
 import notificacaoRoutes from './notificacao.routes';
 import settingRoutes from './setting.routes';
+import authRoutes from './auth.routes';
+
 
 const router = Router();
 
@@ -30,6 +32,7 @@ router.use('/transacoes-recorrentes', transacoesRecorrentesRoutes);
 router.use('/transferencias', transferenciaRoutes);
 router.use('/notificacoes', notificacaoRoutes);
 router.use('/settings', settingRoutes);
+router.use('/auth', authRoutes);
 
 export default router;
 

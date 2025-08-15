@@ -18,6 +18,7 @@ const transacoesRecorrentes_routes_1 = __importDefault(require("./transacoesReco
 const transferencia_routes_1 = __importDefault(require("./transferencia.routes"));
 const notificacao_routes_1 = __importDefault(require("./notificacao.routes"));
 const setting_routes_1 = __importDefault(require("./setting.routes"));
+const auth_routes_1 = __importDefault(require("./auth.routes"));
 const router = (0, express_1.Router)();
 router.use('/usuarios', usuario_routes_1.default);
 router.use('/despesas', despesa_routes_1.default);
@@ -33,4 +34,5 @@ router.use('/transacoes-recorrentes', transacoesRecorrentes_routes_1.default);
 router.use('/transferencias', transferencia_routes_1.default);
 router.use('/notificacoes', notificacao_routes_1.default);
 router.use('/settings', setting_routes_1.default);
+router.use('/auth', auth_routes_1.default);
 exports.default = router;
