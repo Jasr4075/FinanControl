@@ -24,3 +24,20 @@ export const loginUsuario = async (req: Request, res: Response, next: NextFuncti
     next(err);
   }
 };
+
+export const registerUsuario = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const usuario = await UsuarioService.create(req.body);
+
+    // Generar token JWT al registrarse
+    const token = TokenService.gerarToken({
+      id: usuario.id,
+      username: usuario.username,
+      role: usuario.role,
+    });
+
+    res.status(201).json({ user: usuario, token });
+  } catch (err) {
+    next(err);
+  }
+};
