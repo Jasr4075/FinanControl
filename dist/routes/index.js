@@ -19,20 +19,24 @@ const transferencia_routes_1 = __importDefault(require("./transferencia.routes")
 const notificacao_routes_1 = __importDefault(require("./notificacao.routes"));
 const setting_routes_1 = __importDefault(require("./setting.routes"));
 const auth_routes_1 = __importDefault(require("./auth.routes"));
+const autenticacao_1 = require("../middlewares/autenticacao");
 const router = (0, express_1.Router)();
-router.use('/usuarios', usuario_routes_1.default);
-router.use('/despesas', despesa_routes_1.default);
-router.use('/cashback', cashback_routes_1.default);
-router.use('/categorias', category_routes_1.default);
-router.use('/contas', conta_routes_1.default);
-router.use('/cartoes', cartao_routes_1.default);
-router.use('/metas', meta_routes_1.default);
-router.use('/faturas', fatura_routes_1.default);
-router.use('/parcelas', parcela_routes_1.default);
-router.use('/receitas', receitas_routes_1.default);
-router.use('/transacoes-recorrentes', transacoesRecorrentes_routes_1.default);
-router.use('/transferencias', transferencia_routes_1.default);
-router.use('/notificacoes', notificacao_routes_1.default);
-router.use('/settings', setting_routes_1.default);
+// Rutas de usuarios
+router.use('/usuarios', autenticacao_1.autenticarRequisicao, usuario_routes_1.default);
+// Rutas protegidas por JWT
+router.use('/despesas', autenticacao_1.autenticarRequisicao, despesa_routes_1.default);
+router.use('/cashback', autenticacao_1.autenticarRequisicao, cashback_routes_1.default);
+router.use('/categorias', autenticacao_1.autenticarRequisicao, category_routes_1.default);
+router.use('/contas', autenticacao_1.autenticarRequisicao, conta_routes_1.default);
+router.use('/cartoes', autenticacao_1.autenticarRequisicao, cartao_routes_1.default);
+router.use('/metas', autenticacao_1.autenticarRequisicao, meta_routes_1.default);
+router.use('/faturas', autenticacao_1.autenticarRequisicao, fatura_routes_1.default);
+router.use('/parcelas', autenticacao_1.autenticarRequisicao, parcela_routes_1.default);
+router.use('/receitas', autenticacao_1.autenticarRequisicao, receitas_routes_1.default);
+router.use('/transacoes-recorrentes', autenticacao_1.autenticarRequisicao, transacoesRecorrentes_routes_1.default);
+router.use('/transferencias', autenticacao_1.autenticarRequisicao, transferencia_routes_1.default);
+router.use('/notificacoes', autenticacao_1.autenticarRequisicao, notificacao_routes_1.default);
+router.use('/settings', autenticacao_1.autenticarRequisicao, setting_routes_1.default);
+// Rutas públicas (login / registro)
 router.use('/auth', auth_routes_1.default);
 exports.default = router;

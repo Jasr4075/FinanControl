@@ -1,7 +1,15 @@
 import { Router } from 'express';
-import { gerarToken } from '../controllers/AuthController';
+import { loginUsuario } from '../controllers/AuthController';
+import { z } from 'zod';
+import { validate } from '../middlewares/validate';
 
 const router = Router();
 
-router.post('/token', gerarToken);
+const loginSchema = z.object({
+  username: z.string().min(3),
+  senha: z.string().min(6),
+});
+
+router.post('/login', validate(loginSchema), loginUsuario);
+
 export default router;

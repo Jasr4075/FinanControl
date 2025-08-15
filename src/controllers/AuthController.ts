@@ -1,32 +1,26 @@
-import { Request, Response, NextFunction } from 'express'
-import { TokenService } from '../services/TokenService'
-import { gerarTokenSchema } from '../validators/auth.schema'
-import { z } from 'zod'
+import { Request, Response, NextFunction } from 'express';
+import { UsuarioService } from '../services/UsuarioService';
+import { TokenService } from '../services/TokenService';
+import bcrypt from 'bcrypt';
 
-type GerarTokenRequestBody = z.infer<typeof gerarTokenSchema>
-
-export async function gerarToken(req: Request, res: Response, next: NextFunction): Promise<void> {
-  const parsed = gerarTokenSchema.safeParse(req.body)
-
-  if (!parsed.success) {
-    res.status(400).json({
-      erro: 'Dados inválidos.',
-      detalhes: parsed.error.flatten(),
-    })
-    return
-  }
-
-  const { system } = parsed.data
-
-  if (system !== process.env.SYSTEM_KEY) {
-    res.status(403).json({ erro: 'Sistema não autorizado.' })
-    return
-  }
-
+export const loginUsuario = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const token = TokenService.gerarToken({ origem: system })
-    res.json({ token })
-  } catch (error) {
-    next(error)
+    const { username, senha } = req.body;
+    const usuario = await UsuarioService.findByUsernameRaw(username);
+
+    if (!usuario) return res.status(401).json({ erro: 'Usuário ou senha inválidos.' });
+
+    const senhaValida = await bcrypt.compare(senha, usuario.hash);
+    if (!senhaValida) return res.status(401).json({ erro: 'Usuário ou senha inválidos.' });
+
+    const token = TokenService.gerarToken({
+      id: usuario.id,
+      username: usuario.username,
+      role: usuario.role,
+    });
+
+    res.json({ token, user: UsuarioService.sanitizeUser(usuario) });
+  } catch (err) {
+    next(err);
   }
-}
+};

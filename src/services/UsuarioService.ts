@@ -74,4 +74,13 @@ export class UsuarioService {
     if (!usuario) throw new AppError('Usuário não encontrado.', 404);
     await usuario.destroy();
   }
+
+  static async findByUsername(username: string) {
+    const usuario = await Usuario.findOne({ where: { username } });
+    return usuario ? this.sanitizeUser(usuario) : null;
+  }
+
+  static async findByUsernameRaw(username: string) {
+    return await Usuario.findOne({ where: { username } });
+  }
 }

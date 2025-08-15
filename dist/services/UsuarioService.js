@@ -75,5 +75,16 @@ class UsuarioService {
             yield usuario.destroy();
         });
     }
+    static findByUsername(username) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const usuario = yield Usuario_1.Usuario.findOne({ where: { username } });
+            return usuario ? this.sanitizeUser(usuario) : null;
+        });
+    }
+    static findByUsernameRaw(username) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield Usuario_1.Usuario.findOne({ where: { username } });
+        });
+    }
 }
 exports.UsuarioService = UsuarioService;

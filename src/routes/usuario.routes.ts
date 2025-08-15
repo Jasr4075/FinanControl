@@ -9,6 +9,7 @@ import {
 import { validate } from '../middlewares/validate';
 import { usuarioCreateSchema, usuarioUpdateSchema } from '../validators/usuario.schema';
 
+
 const router = Router();
 
 router.post('/', validate(usuarioCreateSchema), createUsuario);
