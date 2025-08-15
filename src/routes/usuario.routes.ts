@@ -9,13 +9,14 @@ import {
 import { validate } from '../middlewares/validate';
 import { usuarioCreateSchema, usuarioUpdateSchema } from '../validators/usuario.schema';
 
+import { autenticarRequisicao } from '../middlewares/autenticacao';
 
 const router = Router();
 
 router.post('/', validate(usuarioCreateSchema), createUsuario);
-router.get('/', getUsuarios);
-router.get('/:id', getUsuarioById);
-router.put('/:id', validate(usuarioUpdateSchema), updateUsuario);
-router.delete('/:id', deleteUsuario);
+router.get('/',autenticarRequisicao, getUsuarios);
+router.get('/:id',autenticarRequisicao, getUsuarioById);
+router.put('/:id',autenticarRequisicao, validate(usuarioUpdateSchema), updateUsuario);
+router.delete('/:id',autenticarRequisicao, deleteUsuario);
 
 export default router;

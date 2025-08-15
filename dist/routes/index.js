@@ -22,7 +22,7 @@ const auth_routes_1 = __importDefault(require("./auth.routes"));
 const autenticacao_1 = require("../middlewares/autenticacao");
 const router = (0, express_1.Router)();
 // Rutas de usuarios
-router.use('/usuarios', autenticacao_1.autenticarRequisicao, usuario_routes_1.default);
+router.use('/usuarios', usuario_routes_1.default);
 // Rutas protegidas por JWT
 router.use('/despesas', autenticacao_1.autenticarRequisicao, despesa_routes_1.default);
 router.use('/cashback', autenticacao_1.autenticarRequisicao, cashback_routes_1.default);

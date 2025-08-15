@@ -20,7 +20,7 @@ import { autenticarRequisicao } from '../middlewares/autenticacao';
 const router = Router();
 
 // Rutas de usuarios
-router.use('/usuarios', autenticarRequisicao, usuarioRoutes);
+router.use('/usuarios', usuarioRoutes);
 
 // Rutas protegidas por JWT
 router.use('/despesas', autenticarRequisicao, despesaRoutes);
