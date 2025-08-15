@@ -6,7 +6,6 @@ const validate_1 = require("../middlewares/validate");
 const usuario_schema_1 = require("../validators/usuario.schema");
 const autenticacao_1 = require("../middlewares/autenticacao");
 const router = (0, express_1.Router)();
-router.post('/', (0, validate_1.validate)(usuario_schema_1.usuarioCreateSchema), UsuarioController_1.createUsuario);
 router.get('/', autenticacao_1.autenticarRequisicao, UsuarioController_1.getUsuarios);
 router.get('/:id', autenticacao_1.autenticarRequisicao, UsuarioController_1.getUsuarioById);
 router.put('/:id', autenticacao_1.autenticarRequisicao, (0, validate_1.validate)(usuario_schema_1.usuarioUpdateSchema), UsuarioController_1.updateUsuario);

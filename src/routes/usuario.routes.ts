@@ -1,19 +1,17 @@
 import { Router } from 'express';
 import {
-  createUsuario,
   getUsuarios,
   getUsuarioById,
   updateUsuario,
   deleteUsuario,
 } from '../controllers/UsuarioController';
 import { validate } from '../middlewares/validate';
-import { usuarioCreateSchema, usuarioUpdateSchema } from '../validators/usuario.schema';
+import { usuarioUpdateSchema } from '../validators/usuario.schema';
 
 import { autenticarRequisicao } from '../middlewares/autenticacao';
 
 const router = Router();
 
-router.post('/', validate(usuarioCreateSchema), createUsuario);
 router.get('/',autenticarRequisicao, getUsuarios);
 router.get('/:id',autenticarRequisicao, getUsuarioById);
 router.put('/:id',autenticarRequisicao, validate(usuarioUpdateSchema), updateUsuario);
