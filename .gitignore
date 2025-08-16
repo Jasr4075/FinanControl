@@ -7,7 +7,6 @@ yarn-error.log*
 .eslintcache
 .nyc_output/
 .parcel-cache/
-dist/
 logs/
 
 /node_modules/
