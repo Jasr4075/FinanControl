@@ -1,10 +1,11 @@
 import { Request, Response } from 'express'
 import { CartaoService } from '../services/CartaoService'
+import { cartaoCreateSchema } from '../validators/cartao.schema'
 
 export const createCartao = async (req: Request, res: Response) => {
   try {
-    const cartao = await CartaoService.create(req.body)
-    res.status(201).json({ success: true, data: cartao })
+    const validatedCartao = cartaoCreateSchema.parse(req.body)
+    const cartao = await CartaoService.create(validatedCartao)
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message })
   }

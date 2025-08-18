@@ -11,10 +11,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteCartao = exports.updateCartao = exports.getCartaoById = exports.getCartoes = exports.createCartao = void 0;
 const CartaoService_1 = require("../services/CartaoService");
+const cartao_schema_1 = require("../validators/cartao.schema");
 const createCartao = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const cartao = yield CartaoService_1.CartaoService.create(req.body);
-        res.status(201).json({ success: true, data: cartao });
+        const validatedCartao = cartao_schema_1.cartaoCreateSchema.parse(req.body);
+        const cartao = yield CartaoService_1.CartaoService.create(validatedCartao);
     }
     catch (error) {
         res.status(400).json({ success: false, message: error.message });
