@@ -11,53 +11,74 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteTransacaoRecorrente = exports.updateTransacaoRecorrente = exports.getTransacaoRecorrenteById = exports.getTransacoesRecorrentes = exports.createTransacaoRecorrente = void 0;
 const TransacoesRecorrentesService_1 = require("../services/TransacoesRecorrentesService");
-const createTransacaoRecorrente = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const transacoesRecorrentes_schema_1 = require("../validators/transacoesRecorrentes.schema");
+const zod_1 = require("zod");
+// --- Criar transação recorrente ---
+const createTransacaoRecorrente = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const transacao = yield TransacoesRecorrentesService_1.TransacoesRecorrentesService.create(req.body);
+        const validated = transacoesRecorrentes_schema_1.transacaoRecorrenteCreateSchema.parse(req.body);
+        const transacao = yield TransacoesRecorrentesService_1.TransacoesRecorrentesService.create(validated);
         res.status(201).json({ success: true, data: transacao });
     }
     catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+        if (error instanceof zod_1.z.ZodError) {
+            return res.status(400).json({ success: false, errors: error.errors });
+        }
+        next(error);
     }
 });
 exports.createTransacaoRecorrente = createTransacaoRecorrente;
-const getTransacoesRecorrentes = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Listar todas ---
+const getTransacoesRecorrentes = (_req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const transacoes = yield TransacoesRecorrentesService_1.TransacoesRecorrentesService.getAll();
         res.status(200).json({ success: true, data: transacoes });
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.getTransacoesRecorrentes = getTransacoesRecorrentes;
-const getTransacaoRecorrenteById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Buscar por ID ---
+const getTransacaoRecorrenteById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const transacao = yield TransacoesRecorrentesService_1.TransacoesRecorrentesService.getById(req.params.id);
+        if (!transacao)
+            return res.status(404).json({ success: false, message: 'Transação recorrente não encontrada.' });
         res.status(200).json({ success: true, data: transacao });
     }
     catch (error) {
-        res.status(404).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.getTransacaoRecorrenteById = getTransacaoRecorrenteById;
-const updateTransacaoRecorrente = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Atualizar ---
+const updateTransacaoRecorrente = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const transacao = yield TransacoesRecorrentesService_1.TransacoesRecorrentesService.update(req.params.id, req.body);
+        const validated = transacoesRecorrentes_schema_1.transacaoRecorrenteUpdateSchema.parse(req.body);
+        const transacao = yield TransacoesRecorrentesService_1.TransacoesRecorrentesService.update(req.params.id, validated);
+        if (!transacao)
+            return res.status(404).json({ success: false, message: 'Transação recorrente não encontrada.' });
         res.status(200).json({ success: true, data: transacao });
     }
     catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+        if (error instanceof zod_1.z.ZodError) {
+            return res.status(400).json({ success: false, errors: error.errors });
+        }
+        next(error);
     }
 });
 exports.updateTransacaoRecorrente = updateTransacaoRecorrente;
-const deleteTransacaoRecorrente = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Deletar ---
+const deleteTransacaoRecorrente = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield TransacoesRecorrentesService_1.TransacoesRecorrentesService.delete(req.params.id);
-        res.status(200).json(Object.assign({ success: true }, result));
+        const deleted = yield TransacoesRecorrentesService_1.TransacoesRecorrentesService.delete(req.params.id);
+        if (!deleted)
+            return res.status(404).json({ success: false, message: 'Transação recorrente não encontrada.' });
+        res.status(200).json({ success: true, message: 'Transação recorrente excluída com sucesso.' });
     }
     catch (error) {
-        res.status(404).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.deleteTransacaoRecorrente = deleteTransacaoRecorrente;

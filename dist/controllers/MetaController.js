@@ -11,9 +11,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMeta = exports.updateMeta = exports.getMetaById = exports.getMetas = exports.createMeta = void 0;
 const MetaService_1 = require("../services/MetaService");
+const meta_schema_1 = require("../validators/meta.schema");
 const createMeta = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const meta = yield MetaService_1.MetaService.create(req.body);
+        const metaValidated = meta_schema_1.metaCreateSchema.parse(req.body);
+        const meta = yield MetaService_1.MetaService.create(metaValidated);
         res.status(201).json({ success: true, data: meta });
     }
     catch (error) {
@@ -45,11 +47,13 @@ exports.getMetaById = getMetaById;
 const updateMeta = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const metaAtualizada = yield MetaService_1.MetaService.update(id, req.body);
+        const metaValidated = meta_schema_1.metaUpdateSchema.parse(req.body);
+        const metaAtualizada = yield MetaService_1.MetaService.update(id, metaValidated);
         res.status(200).json({ success: true, data: metaAtualizada });
     }
     catch (error) {
-        res.status(error.message === 'Meta não encontrada.' || error.message.startsWith('Mês inválido') ? 400 : 400).json({ success: false, message: error.message });
+        const status = error.message === 'Meta não encontrada.' ? 404 : 400;
+        res.status(status).json({ success: false, message: error.message });
     }
 });
 exports.updateMeta = updateMeta;

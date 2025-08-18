@@ -54,9 +54,12 @@ export class CashbackService {
     return await Cashback.findByPk(id, { include: includeRelations })
   }
 
-  static async delete(id: string) {
-    const cashback = await Cashback.findByPk(id)
-    if (!cashback) throw new Error('Cashback não encontrado.')
-    await cashback.destroy()
+  static async delete(id: string): Promise<boolean> {
+    const cashback = await Cashback.findByPk(id);
+    if (!cashback) throw new Error('Cashback não encontrado.');
+  
+    await cashback.destroy();
+    return true;
   }
+  
 }

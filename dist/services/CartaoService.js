@@ -63,7 +63,8 @@ class CartaoService {
             const cartao = yield Cartao_1.Cartao.findByPk(id);
             if (!cartao)
                 throw new Error('Cartão não encontrado.');
-            yield cartao.destroy();
+            yield cartao.destroy(); // deleta o registro do banco
+            return true;
         });
     }
 }

@@ -59,6 +59,7 @@ class CashbackService {
             if (!cashback)
                 throw new Error('Cashback não encontrado.');
             yield cashback.destroy();
+            return true;
         });
     }
 }

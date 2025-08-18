@@ -11,53 +11,74 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteTransferencia = exports.updateTransferencia = exports.getTransferenciaById = exports.getTransferencias = exports.createTransferencia = void 0;
 const TransferenciaService_1 = require("../services/TransferenciaService");
-const createTransferencia = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const transferencia_schema_1 = require("../validators/transferencia.schema");
+const zod_1 = require("zod");
+// --- Criar transferência ---
+const createTransferencia = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const transferencia = yield TransferenciaService_1.transferenciaService.create(req.body);
-        res.status(201).json(transferencia);
+        const validated = transferencia_schema_1.transferenciaCreateSchema.parse(req.body);
+        const transferencia = yield TransferenciaService_1.transferenciaService.create(validated);
+        res.status(201).json({ success: true, data: transferencia });
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        if (error instanceof zod_1.z.ZodError) {
+            return res.status(400).json({ success: false, errors: error.errors });
+        }
+        next(error);
     }
 });
 exports.createTransferencia = createTransferencia;
-const getTransferencias = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Listar todas ---
+const getTransferencias = (_req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const transferencias = yield TransferenciaService_1.transferenciaService.getAll();
-        res.status(200).json(transferencias);
+        res.status(200).json({ success: true, data: transferencias });
     }
     catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error);
     }
 });
 exports.getTransferencias = getTransferencias;
-const getTransferenciaById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Buscar por ID ---
+const getTransferenciaById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const transferencia = yield TransferenciaService_1.transferenciaService.getById(req.params.id);
-        res.status(200).json(transferencia);
+        if (!transferencia)
+            return res.status(404).json({ success: false, message: 'Transferência não encontrada.' });
+        res.status(200).json({ success: true, data: transferencia });
     }
     catch (error) {
-        res.status(error.message.includes('não encontrada') ? 404 : 500).json({ message: error.message });
+        next(error);
     }
 });
 exports.getTransferenciaById = getTransferenciaById;
-const updateTransferencia = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Atualizar ---
+const updateTransferencia = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const transferencia = yield TransferenciaService_1.transferenciaService.update(req.params.id, req.body);
-        res.status(200).json(transferencia);
+        const validated = transferencia_schema_1.transferenciaUpdateSchema.parse(req.body);
+        const transferencia = yield TransferenciaService_1.transferenciaService.update(req.params.id, validated);
+        if (!transferencia)
+            return res.status(404).json({ success: false, message: 'Transferência não encontrada.' });
+        res.status(200).json({ success: true, data: transferencia });
     }
     catch (error) {
-        res.status(error.message.includes('não encontrada') ? 404 : 400).json({ message: error.message });
+        if (error instanceof zod_1.z.ZodError) {
+            return res.status(400).json({ success: false, errors: error.errors });
+        }
+        next(error);
     }
 });
 exports.updateTransferencia = updateTransferencia;
-const deleteTransferencia = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Deletar ---
+const deleteTransferencia = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield TransferenciaService_1.transferenciaService.delete(req.params.id);
-        res.status(200).json(result);
+        const deleted = yield TransferenciaService_1.transferenciaService.delete(req.params.id);
+        if (!deleted)
+            return res.status(404).json({ success: false, message: 'Transferência não encontrada.' });
+        res.status(200).json({ success: true, message: 'Transferência excluída com sucesso.' });
     }
     catch (error) {
-        res.status(error.message.includes('não encontrada') ? 404 : 500).json({ message: error.message });
+        next(error);
     }
 });
 exports.deleteTransferencia = deleteTransferencia;

@@ -12,7 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteConta = exports.updateConta = exports.getContaById = exports.getContas = exports.createConta = void 0;
 const ContaService_1 = require("../services/ContaService");
 const conta_schema_1 = require("../validators/conta.schema");
-const createConta = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const zod_1 = require("zod");
+const createConta = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // valida entrada com zod
         const data = conta_schema_1.contaCreateSchema.parse(req.body);
@@ -20,63 +21,64 @@ const createConta = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         res.status(201).json({ success: true, data: conta });
     }
     catch (error) {
-        if (error.name === 'ZodError') {
+        if (error instanceof zod_1.z.ZodError) {
             return res.status(400).json({ success: false, errors: error.errors });
         }
-        res.status(400).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.createConta = createConta;
-const getContas = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getContas = (_req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const contas = yield ContaService_1.ContaService.findAll();
         res.status(200).json({ success: true, data: contas });
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.getContas = getContas;
-const getContaById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getContaById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const conta = yield ContaService_1.ContaService.findById(req.params.id);
-        if (!conta)
+        if (!conta) {
             return res.status(404).json({ success: false, message: 'Conta não encontrada.' });
+        }
         res.status(200).json({ success: true, data: conta });
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.getContaById = getContaById;
-const updateConta = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateConta = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // valida entrada com zod
         const data = conta_schema_1.contaUpdateSchema.parse(req.body);
         const conta = yield ContaService_1.ContaService.update(req.params.id, data);
+        if (!conta) {
+            return res.status(404).json({ success: false, message: 'Conta não encontrada.' });
+        }
         res.status(200).json({ success: true, data: conta });
     }
     catch (error) {
-        if (error.name === 'ZodError') {
+        if (error instanceof zod_1.z.ZodError) {
             return res.status(400).json({ success: false, errors: error.errors });
         }
-        if (error.message === 'Conta não encontrada.') {
-            return res.status(404).json({ success: false, message: error.message });
-        }
-        res.status(400).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.updateConta = updateConta;
-const deleteConta = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteConta = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield ContaService_1.ContaService.delete(req.params.id);
+        const deleted = yield ContaService_1.ContaService.delete(req.params.id);
+        if (!deleted) {
+            return res.status(404).json({ success: false, message: 'Conta não encontrada.' });
+        }
         res.status(200).json({ success: true, message: 'Conta excluída com sucesso.' });
     }
     catch (error) {
-        if (error.message === 'Conta não encontrada.') {
-            return res.status(404).json({ success: false, message: error.message });
-        }
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.deleteConta = deleteConta;

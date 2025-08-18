@@ -61,9 +61,12 @@ export class ContaService {
     return await Conta.findByPk(id, { include: includeRelations })
   }
 
-  static async delete(id: string) {
-    const conta = await Conta.findByPk(id)
-    if (!conta) throw new Error('Conta não encontrada.')
-    await conta.destroy()
+  static async delete(id: string): Promise<boolean> {
+    const conta = await Conta.findByPk(id);
+    if (!conta) throw new Error('Conta não encontrada.');
+  
+    await conta.destroy();
+    return true;
   }
+  
 }

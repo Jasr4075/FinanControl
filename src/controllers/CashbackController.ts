@@ -1,54 +1,65 @@
-import { Request, Response } from 'express'
-import { CashbackService } from '../services/CashbackService'
+import { Request, Response, NextFunction } from 'express';
+import { CashbackService } from '../services/CashbackService';
+import { cashbackCreateSchema, cashbackUpdateSchema } from '../validators/cashback.schema';
+import { z } from 'zod';
 
-export const createCashback = async (req: Request, res: Response) => {
+// --- Criar cashback ---
+export const createCashback = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const cashback = await CashbackService.create(req.body)
-    res.status(201).json({ success: true, data: cashback })
+    const validatedCashback = cashbackCreateSchema.parse(req.body);
+    const cashback = await CashbackService.create(validatedCashback);
+    res.status(201).json({ success: true, data: cashback });
   } catch (error: any) {
-    res.status(400).json({ success: false, message: error.message })
-  }
-}
-
-export const getCashbacks = async (_req: Request, res: Response) => {
-  try {
-    const cashbacks = await CashbackService.findAll()
-    res.status(200).json({ success: true, data: cashbacks })
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message })
-  }
-}
-
-export const getCashbackById = async (req: Request, res: Response) => {
-  try {
-    const cashback = await CashbackService.findById(req.params.id)
-    if (!cashback) return res.status(404).json({ success: false, message: 'Cashback não encontrado.' })
-    res.status(200).json({ success: true, data: cashback })
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message })
-  }
-}
-
-export const updateCashback = async (req: Request, res: Response) => {
-  try {
-    const cashback = await CashbackService.update(req.params.id, req.body)
-    res.status(200).json({ success: true, data: cashback })
-  } catch (error: any) {
-    if (error.message === 'Cashback não encontrado.') {
-      return res.status(404).json({ success: false, message: error.message })
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ success: false, errors: error.errors });
     }
-    res.status(400).json({ success: false, message: error.message })
+    next(error);
   }
-}
+};
 
-export const deleteCashback = async (req: Request, res: Response) => {
+// --- Listar todos ---
+export const getCashbacks = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    await CashbackService.delete(req.params.id)
-    res.status(200).json({ success: true, message: 'Cashback excluído com sucesso.' })
-  } catch (error: any) {
-    if (error.message === 'Cashback não encontrado.') {
-      return res.status(404).json({ success: false, message: error.message })
-    }
-    res.status(500).json({ success: false, message: error.message })
+    const cashbacks = await CashbackService.findAll();
+    res.status(200).json({ success: true, data: cashbacks });
+  } catch (error) {
+    next(error);
   }
-}
+};
+
+// --- Buscar por ID ---
+export const getCashbackById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const cashback = await CashbackService.findById(req.params.id);
+    if (!cashback) return res.status(404).json({ success: false, message: 'Cashback não encontrado.' });
+    res.status(200).json({ success: true, data: cashback });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// --- Atualizar ---
+export const updateCashback = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const validatedCashback = cashbackUpdateSchema.parse(req.body);
+    const cashback = await CashbackService.update(req.params.id, validatedCashback);
+    if (!cashback) return res.status(404).json({ success: false, message: 'Cashback não encontrado.' });
+    res.status(200).json({ success: true, data: cashback });
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ success: false, errors: error.errors });
+    }
+    next(error);
+  }
+};
+
+// --- Deletar ---
+export const deleteCashback = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const deleted = await CashbackService.delete(req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'Cashback não encontrado.' });
+    res.status(200).json({ success: true, message: 'Cashback excluído com sucesso.' });
+  } catch (error) {
+    next(error);
+  }
+};

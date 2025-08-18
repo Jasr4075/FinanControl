@@ -1,47 +1,65 @@
-import { Request, Response } from 'express'
-import { TransacoesRecorrentesService } from '../services/TransacoesRecorrentesService'
+import { Request, Response, NextFunction } from 'express';
+import { TransacoesRecorrentesService } from '../services/TransacoesRecorrentesService';
+import { transacaoRecorrenteCreateSchema, transacaoRecorrenteUpdateSchema } from '../validators/transacoesRecorrentes.schema';
+import { z } from 'zod';
 
-export const createTransacaoRecorrente = async (req: Request, res: Response) => {
+// --- Criar transação recorrente ---
+export const createTransacaoRecorrente = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const transacao = await TransacoesRecorrentesService.create(req.body)
-    res.status(201).json({ success: true, data: transacao })
+    const validated = transacaoRecorrenteCreateSchema.parse(req.body);
+    const transacao = await TransacoesRecorrentesService.create(validated);
+    res.status(201).json({ success: true, data: transacao });
   } catch (error: any) {
-    res.status(400).json({ success: false, message: error.message })
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ success: false, errors: error.errors });
+    }
+    next(error);
   }
-}
+};
 
-export const getTransacoesRecorrentes = async (_req: Request, res: Response) => {
+// --- Listar todas ---
+export const getTransacoesRecorrentes = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const transacoes = await TransacoesRecorrentesService.getAll()
-    res.status(200).json({ success: true, data: transacoes })
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message })
+    const transacoes = await TransacoesRecorrentesService.getAll();
+    res.status(200).json({ success: true, data: transacoes });
+  } catch (error) {
+    next(error);
   }
-}
+};
 
-export const getTransacaoRecorrenteById = async (req: Request, res: Response) => {
+// --- Buscar por ID ---
+export const getTransacaoRecorrenteById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const transacao = await TransacoesRecorrentesService.getById(req.params.id)
-    res.status(200).json({ success: true, data: transacao })
-  } catch (error: any) {
-    res.status(404).json({ success: false, message: error.message })
+    const transacao = await TransacoesRecorrentesService.getById(req.params.id);
+    if (!transacao) return res.status(404).json({ success: false, message: 'Transação recorrente não encontrada.' });
+    res.status(200).json({ success: true, data: transacao });
+  } catch (error) {
+    next(error);
   }
-}
+};
 
-export const updateTransacaoRecorrente = async (req: Request, res: Response) => {
+// --- Atualizar ---
+export const updateTransacaoRecorrente = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const transacao = await TransacoesRecorrentesService.update(req.params.id, req.body)
-    res.status(200).json({ success: true, data: transacao })
+    const validated = transacaoRecorrenteUpdateSchema.parse(req.body);
+    const transacao = await TransacoesRecorrentesService.update(req.params.id, validated);
+    if (!transacao) return res.status(404).json({ success: false, message: 'Transação recorrente não encontrada.' });
+    res.status(200).json({ success: true, data: transacao });
   } catch (error: any) {
-    res.status(400).json({ success: false, message: error.message })
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ success: false, errors: error.errors });
+    }
+    next(error);
   }
-}
+};
 
-export const deleteTransacaoRecorrente = async (req: Request, res: Response) => {
+// --- Deletar ---
+export const deleteTransacaoRecorrente = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await TransacoesRecorrentesService.delete(req.params.id)
-    res.status(200).json({ success: true, ...result })
-  } catch (error: any) {
-    res.status(404).json({ success: false, message: error.message })
+    const deleted = await TransacoesRecorrentesService.delete(req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'Transação recorrente não encontrada.' });
+    res.status(200).json({ success: true, message: 'Transação recorrente excluída com sucesso.' });
+  } catch (error) {
+    next(error);
   }
-}
+};

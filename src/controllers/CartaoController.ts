@@ -1,55 +1,62 @@
-import { Request, Response } from 'express'
-import { CartaoService } from '../services/CartaoService'
-import { cartaoCreateSchema } from '../validators/cartao.schema'
+import { Request, Response, NextFunction } from 'express';
+import { CartaoService } from '../services/CartaoService';
+import { cartaoCreateSchema } from '../validators/cartao.schema';
+import { z } from 'zod';
 
-export const createCartao = async (req: Request, res: Response) => {
+// --- Criar cartão ---
+export const createCartao = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const validatedCartao = cartaoCreateSchema.parse(req.body)
-    const cartao = await CartaoService.create(validatedCartao)
+    const validatedCartao = cartaoCreateSchema.parse(req.body);
+    const cartao = await CartaoService.create(validatedCartao);
+    res.status(201).json({ success: true, data: cartao });
   } catch (error: any) {
-    res.status(400).json({ success: false, message: error.message })
-  }
-}
-
-export const getCartoes = async (_req: Request, res: Response) => {
-  try {
-    const cartoes = await CartaoService.findAll()
-    res.status(200).json({ success: true, data: cartoes })
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message })
-  }
-}
-
-export const getCartaoById = async (req: Request, res: Response) => {
-  try {
-    const cartao = await CartaoService.findById(req.params.id)
-    if (!cartao) return res.status(404).json({ success: false, message: 'Cartão não encontrado.' })
-    res.status(200).json({ success: true, data: cartao })
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message })
-  }
-}
-
-export const updateCartao = async (req: Request, res: Response) => {
-  try {
-    const cartao = await CartaoService.update(req.params.id, req.body)
-    res.status(200).json({ success: true, data: cartao })
-  } catch (error: any) {
-    if (error.message === 'Cartão não encontrado.') {
-      return res.status(404).json({ success: false, message: error.message })
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ success: false, errors: error.errors });
     }
-    res.status(400).json({ success: false, message: error.message })
+    next(error);
   }
-}
+};
 
-export const deleteCartao = async (req: Request, res: Response) => {
+// --- Listar todos os cartões ---
+export const getCartoes = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    await CartaoService.delete(req.params.id)
-    res.status(200).json({ success: true, message: 'Cartão excluído com sucesso.' })
-  } catch (error: any) {
-    if (error.message === 'Cartão não encontrado.') {
-      return res.status(404).json({ success: false, message: error.message })
-    }
-    res.status(500).json({ success: false, message: error.message })
+    const cartoes = await CartaoService.findAll();
+    res.status(200).json({ success: true, data: cartoes });
+  } catch (error) {
+    next(error);
   }
-}
+};
+
+// --- Buscar cartão por ID ---
+export const getCartaoById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const cartao = await CartaoService.findById(req.params.id);
+    if (!cartao) return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
+    res.status(200).json({ success: true, data: cartao });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// --- Atualizar cartão ---
+export const updateCartao = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Aqui você pode criar um schema de update opcional, se quiser validação parcial
+    const cartao = await CartaoService.update(req.params.id, req.body);
+    if (!cartao) return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
+    res.status(200).json({ success: true, data: cartao });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// --- Deletar cartão ---
+export const deleteCartao = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const deleted = await CartaoService.delete(req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
+    res.status(200).json({ success: true, message: 'Cartão excluído com sucesso.' });
+  } catch (error) {
+    next(error);
+  }
+};

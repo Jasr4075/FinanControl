@@ -73,7 +73,7 @@ class DespesaService {
             if (!despesa)
                 throw new Error('Despesa não encontrada.');
             yield despesa.destroy();
-            return { message: 'Despesa excluída com sucesso.' };
+            return true;
         });
     }
 }

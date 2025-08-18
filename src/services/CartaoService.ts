@@ -79,8 +79,11 @@ export class CartaoService {
   }
 
   static async delete(id: string) {
-    const cartao = await Cartao.findByPk(id)
-    if (!cartao) throw new Error('Cartão não encontrado.')
-    await cartao.destroy()
+    const cartao = await Cartao.findByPk(id);
+    if (!cartao) throw new Error('Cartão não encontrado.');
+  
+    await cartao.destroy(); // deleta o registro do banco
+  
+    return true;
   }
 }

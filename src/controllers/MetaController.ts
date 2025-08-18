@@ -1,9 +1,11 @@
 import { Request, Response } from 'express'
 import { MetaService } from '../services/MetaService'
+import { metaCreateSchema, metaUpdateSchema } from '../validators/meta.schema'
 
 export const createMeta = async (req: Request, res: Response) => {
   try {
-    const meta = await MetaService.create(req.body)
+    const metaValidated = metaCreateSchema.parse(req.body)
+    const meta = await MetaService.create(metaValidated)
     res.status(201).json({ success: true, data: meta })
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message })
@@ -32,10 +34,12 @@ export const getMetaById = async (req: Request, res: Response) => {
 export const updateMeta = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    const metaAtualizada = await MetaService.update(id, req.body)
+    const metaValidated = metaUpdateSchema.parse(req.body)
+    const metaAtualizada = await MetaService.update(id, metaValidated)
     res.status(200).json({ success: true, data: metaAtualizada })
   } catch (error: any) {
-    res.status(error.message === 'Meta não encontrada.' || error.message.startsWith('Mês inválido') ? 400 : 400).json({ success: false, message: error.message })
+    const status = error.message === 'Meta não encontrada.' ? 404 : 400
+    res.status(status).json({ success: false, message: error.message })
   }
 }
 

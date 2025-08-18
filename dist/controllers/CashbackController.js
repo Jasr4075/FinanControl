@@ -11,27 +11,36 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteCashback = exports.updateCashback = exports.getCashbackById = exports.getCashbacks = exports.createCashback = void 0;
 const CashbackService_1 = require("../services/CashbackService");
-const createCashback = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const cashback_schema_1 = require("../validators/cashback.schema");
+const zod_1 = require("zod");
+// --- Criar cashback ---
+const createCashback = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const cashback = yield CashbackService_1.CashbackService.create(req.body);
+        const validatedCashback = cashback_schema_1.cashbackCreateSchema.parse(req.body);
+        const cashback = yield CashbackService_1.CashbackService.create(validatedCashback);
         res.status(201).json({ success: true, data: cashback });
     }
     catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+        if (error instanceof zod_1.z.ZodError) {
+            return res.status(400).json({ success: false, errors: error.errors });
+        }
+        next(error);
     }
 });
 exports.createCashback = createCashback;
-const getCashbacks = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Listar todos ---
+const getCashbacks = (_req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const cashbacks = yield CashbackService_1.CashbackService.findAll();
         res.status(200).json({ success: true, data: cashbacks });
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.getCashbacks = getCashbacks;
-const getCashbackById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Buscar por ID ---
+const getCashbackById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const cashback = yield CashbackService_1.CashbackService.findById(req.params.id);
         if (!cashback)
@@ -39,33 +48,37 @@ const getCashbackById = (req, res) => __awaiter(void 0, void 0, void 0, function
         res.status(200).json({ success: true, data: cashback });
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.getCashbackById = getCashbackById;
-const updateCashback = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Atualizar ---
+const updateCashback = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const cashback = yield CashbackService_1.CashbackService.update(req.params.id, req.body);
+        const validatedCashback = cashback_schema_1.cashbackUpdateSchema.parse(req.body);
+        const cashback = yield CashbackService_1.CashbackService.update(req.params.id, validatedCashback);
+        if (!cashback)
+            return res.status(404).json({ success: false, message: 'Cashback não encontrado.' });
         res.status(200).json({ success: true, data: cashback });
     }
     catch (error) {
-        if (error.message === 'Cashback não encontrado.') {
-            return res.status(404).json({ success: false, message: error.message });
+        if (error instanceof zod_1.z.ZodError) {
+            return res.status(400).json({ success: false, errors: error.errors });
         }
-        res.status(400).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.updateCashback = updateCashback;
-const deleteCashback = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Deletar ---
+const deleteCashback = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield CashbackService_1.CashbackService.delete(req.params.id);
+        const deleted = yield CashbackService_1.CashbackService.delete(req.params.id);
+        if (!deleted)
+            return res.status(404).json({ success: false, message: 'Cashback não encontrado.' });
         res.status(200).json({ success: true, message: 'Cashback excluído com sucesso.' });
     }
     catch (error) {
-        if (error.message === 'Cashback não encontrado.') {
-            return res.status(404).json({ success: false, message: error.message });
-        }
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.deleteCashback = deleteCashback;

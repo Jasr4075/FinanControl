@@ -59,11 +59,10 @@ export class DespesaService {
     return await Despesa.findByPk(id, { include: includeRelations })
   }
 
-  static async delete(id: string) {
-    const despesa = await Despesa.findByPk(id)
-    if (!despesa) throw new Error('Despesa não encontrada.')
-
-    await despesa.destroy()
-    return { message: 'Despesa excluída com sucesso.' }
+  static async delete(id: string): Promise<boolean> {
+    const despesa = await Despesa.findByPk(id);
+    if (!despesa) throw new Error('Despesa não encontrada.');
+    await despesa.destroy();
+    return true;
   }
 }

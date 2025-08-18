@@ -11,56 +11,76 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteDespesa = exports.updateDespesa = exports.getDespesaById = exports.getDespesas = exports.createDespesa = void 0;
 const DespesaService_1 = require("../services/DespesaService");
-const createDespesa = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const despesa_schema_1 = require("../validators/despesa.schema");
+const zod_1 = require("zod");
+// --- Criar despesa ---
+const createDespesa = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const despesa = yield DespesaService_1.DespesaService.create(req.body);
+        const despesaValidated = despesa_schema_1.despesaCreateSchema.parse(req.body);
+        const despesa = yield DespesaService_1.DespesaService.create(despesaValidated);
         res.status(201).json({ success: true, data: despesa });
     }
     catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+        if (error instanceof zod_1.z.ZodError) {
+            return res.status(400).json({ success: false, errors: error.errors });
+        }
+        next(error);
     }
 });
 exports.createDespesa = createDespesa;
-const getDespesas = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Listar todas ---
+const getDespesas = (_req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const despesas = yield DespesaService_1.DespesaService.getAll();
         res.status(200).json({ success: true, data: despesas });
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.getDespesas = getDespesas;
-const getDespesaById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Buscar por ID ---
+const getDespesaById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
         const despesa = yield DespesaService_1.DespesaService.getById(id);
+        if (!despesa)
+            return res.status(404).json({ success: false, message: 'Despesa não encontrada.' });
         res.status(200).json({ success: true, data: despesa });
     }
     catch (error) {
-        res.status(error.message === 'Despesa não encontrada.' ? 404 : 500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.getDespesaById = getDespesaById;
-const updateDespesa = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Atualizar despesa ---
+const updateDespesa = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const despesaAtualizada = yield DespesaService_1.DespesaService.update(id, req.body);
+        const despesaValidated = despesa_schema_1.despesaUpdateSchema.parse(req.body);
+        const despesaAtualizada = yield DespesaService_1.DespesaService.update(id, despesaValidated);
+        if (!despesaAtualizada)
+            return res.status(404).json({ success: false, message: 'Despesa não encontrada.' });
         res.status(200).json({ success: true, data: despesaAtualizada });
     }
     catch (error) {
-        res.status(error.message === 'Despesa não encontrada.' ? 404 : 400).json({ success: false, message: error.message });
+        if (error instanceof zod_1.z.ZodError) {
+            return res.status(400).json({ success: false, errors: error.errors });
+        }
+        next(error);
     }
 });
 exports.updateDespesa = updateDespesa;
-const deleteDespesa = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Deletar despesa ---
+const deleteDespesa = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id } = req.params;
-        const resultado = yield DespesaService_1.DespesaService.delete(id);
-        res.status(200).json({ success: true, message: resultado.message });
+        const deleted = yield DespesaService_1.DespesaService.delete(req.params.id);
+        if (!deleted)
+            return res.status(404).json({ success: false, message: 'Despesa não encontrada.' });
+        res.status(200).json({ success: true, message: 'Despesa excluída com sucesso.' });
     }
     catch (error) {
-        res.status(error.message === 'Despesa não encontrada.' ? 404 : 500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.deleteDespesa = deleteDespesa;

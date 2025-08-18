@@ -60,6 +60,7 @@ class ContaService {
             if (!conta)
                 throw new Error('Conta não encontrada.');
             yield conta.destroy();
+            return true;
         });
     }
 }

@@ -12,27 +12,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteCartao = exports.updateCartao = exports.getCartaoById = exports.getCartoes = exports.createCartao = void 0;
 const CartaoService_1 = require("../services/CartaoService");
 const cartao_schema_1 = require("../validators/cartao.schema");
-const createCartao = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const zod_1 = require("zod");
+// --- Criar cartão ---
+const createCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const validatedCartao = cartao_schema_1.cartaoCreateSchema.parse(req.body);
         const cartao = yield CartaoService_1.CartaoService.create(validatedCartao);
+        res.status(201).json({ success: true, data: cartao });
     }
     catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+        if (error instanceof zod_1.z.ZodError) {
+            return res.status(400).json({ success: false, errors: error.errors });
+        }
+        next(error);
     }
 });
 exports.createCartao = createCartao;
-const getCartoes = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Listar todos os cartões ---
+const getCartoes = (_req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const cartoes = yield CartaoService_1.CartaoService.findAll();
         res.status(200).json({ success: true, data: cartoes });
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.getCartoes = getCartoes;
-const getCartaoById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Buscar cartão por ID ---
+const getCartaoById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const cartao = yield CartaoService_1.CartaoService.findById(req.params.id);
         if (!cartao)
@@ -40,33 +48,34 @@ const getCartaoById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.status(200).json({ success: true, data: cartao });
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.getCartaoById = getCartaoById;
-const updateCartao = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Atualizar cartão ---
+const updateCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        // Aqui você pode criar um schema de update opcional, se quiser validação parcial
         const cartao = yield CartaoService_1.CartaoService.update(req.params.id, req.body);
+        if (!cartao)
+            return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
         res.status(200).json({ success: true, data: cartao });
     }
     catch (error) {
-        if (error.message === 'Cartão não encontrado.') {
-            return res.status(404).json({ success: false, message: error.message });
-        }
-        res.status(400).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.updateCartao = updateCartao;
-const deleteCartao = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// --- Deletar cartão ---
+const deleteCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield CartaoService_1.CartaoService.delete(req.params.id);
+        const deleted = yield CartaoService_1.CartaoService.delete(req.params.id);
+        if (!deleted)
+            return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
         res.status(200).json({ success: true, message: 'Cartão excluído com sucesso.' });
     }
     catch (error) {
-        if (error.message === 'Cartão não encontrado.') {
-            return res.status(404).json({ success: false, message: error.message });
-        }
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 exports.deleteCartao = deleteCartao;

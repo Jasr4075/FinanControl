@@ -8,27 +8,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteReceita = exports.updateReceita = exports.getReceitaById = exports.getReceitas = exports.createReceita = void 0;
 const ReceitaService_1 = require("../services/ReceitaService");
+const receita_schema_1 = require("../validators/receita.schema");
+const zod_1 = __importDefault(require("zod"));
 const createReceita = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { userId, accountId, categoryId, description, quantidade, data, nota } = req.body;
-        if (!userId || !accountId || !categoryId || !description || !quantidade || !data) {
-            return res.status(400).json({ success: false, message: 'Campos obrigatórios não preenchidos.' });
-        }
-        const novaReceita = yield ReceitaService_1.ReceitaService.create({
-            userId,
-            accountId,
-            categoryId,
-            description,
-            quantidade,
-            data,
-            nota,
-        });
+        // Valida os dados de entrada com o schema
+        const validatedData = receita_schema_1.receitaCreateSchema.parse(req.body);
+        const novaReceita = yield ReceitaService_1.ReceitaService.create(validatedData);
         res.status(201).json({ success: true, data: novaReceita });
     }
     catch (error) {
+        if (error instanceof zod_1.default.ZodError) {
+            // Se for um erro de validação do Zod, retorna os erros de forma mais detalhada
+            return res.status(400).json({
+                success: false,
+                message: 'Erro de validação',
+                errors: error.errors.map(err => ({
+                    path: err.path.join('.'),
+                    message: err.message
+                }))
+            });
+        }
         res.status(400).json({ success: false, message: error.message });
     }
 });
@@ -57,14 +63,28 @@ const getReceitaById = (req, res) => __awaiter(void 0, void 0, void 0, function*
 });
 exports.getReceitaById = getReceitaById;
 const updateReceita = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        const receitaAtualizada = yield ReceitaService_1.ReceitaService.update(req.params.id, req.body);
+        // Valida os dados de atualização com o schema
+        const validatedData = receita_schema_1.receitaUpdateSchema.parse(req.body);
+        const updateData = Object.assign(Object.assign({}, validatedData), { nota: (_a = validatedData.nota) !== null && _a !== void 0 ? _a : undefined });
+        const receitaAtualizada = yield ReceitaService_1.ReceitaService.update(req.params.id, updateData);
         if (!receitaAtualizada) {
             return res.status(404).json({ success: false, message: 'Receita não encontrada.' });
         }
         res.status(200).json({ success: true, data: receitaAtualizada });
     }
     catch (error) {
+        if (error instanceof zod_1.default.ZodError) {
+            return res.status(400).json({
+                success: false,
+                message: 'Erro de validação',
+                errors: error.errors.map(err => ({
+                    path: err.path.join('.'),
+                    message: err.message
+                }))
+            });
+        }
         res.status(400).json({ success: false, message: error.message });
     }
 });

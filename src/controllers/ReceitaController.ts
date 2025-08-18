@@ -1,26 +1,28 @@
 import { Request, Response } from 'express'
 import { ReceitaService } from '../services/ReceitaService'
+import { receitaCreateSchema, receitaUpdateSchema } from '../validators/receita.schema'
+import z from 'zod'
 
 export const createReceita = async (req: Request, res: Response) => {
   try {
-    const { userId, accountId, categoryId, description, quantidade, data, nota } = req.body
+    // Valida os dados de entrada com o schema
+    const validatedData = receitaCreateSchema.parse(req.body)
 
-    if (!userId || !accountId || !categoryId || !description || !quantidade || !data) {
-      return res.status(400).json({ success: false, message: 'Campos obrigatórios não preenchidos.' })
-    }
-
-    const novaReceita = await ReceitaService.create({
-      userId,
-      accountId,
-      categoryId,
-      description,
-      quantidade,
-      data,
-      nota,
-    })
+    const novaReceita = await ReceitaService.create(validatedData)
 
     res.status(201).json({ success: true, data: novaReceita })
   } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      // Se for um erro de validação do Zod, retorna os erros de forma mais detalhada
+      return res.status(400).json({
+        success: false,
+        message: 'Erro de validação',
+        errors: error.errors.map(err => ({
+          path: err.path.join('.'),
+          message: err.message
+        }))
+      })
+    }
     res.status(400).json({ success: false, message: error.message })
   }
 }
@@ -48,12 +50,29 @@ export const getReceitaById = async (req: Request, res: Response) => {
 
 export const updateReceita = async (req: Request, res: Response) => {
   try {
-    const receitaAtualizada = await ReceitaService.update(req.params.id, req.body)
+    // Valida os dados de atualização com o schema
+    const validatedData = receitaUpdateSchema.parse(req.body)
+    const updateData = {
+      ...validatedData,
+      nota: validatedData.nota ?? undefined
+    }
+
+    const receitaAtualizada = await ReceitaService.update(req.params.id, updateData)
     if (!receitaAtualizada) {
       return res.status(404).json({ success: false, message: 'Receita não encontrada.' })
     }
     res.status(200).json({ success: true, data: receitaAtualizada })
   } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: 'Erro de validação',
+        errors: error.errors.map(err => ({
+          path: err.path.join('.'),
+          message: err.message
+        }))
+      })
+    }
     res.status(400).json({ success: false, message: error.message })
   }
 }

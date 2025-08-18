@@ -1,47 +1,65 @@
-import { Request, Response } from 'express'
-import { transferenciaService } from '../services/TransferenciaService'
+import { Request, Response, NextFunction } from 'express';
+import { transferenciaService } from '../services/TransferenciaService';
+import { transferenciaCreateSchema, transferenciaUpdateSchema } from '../validators/transferencia.schema';
+import { z } from 'zod';
 
-export const createTransferencia = async (req: Request, res: Response) => {
+// --- Criar transferência ---
+export const createTransferencia = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const transferencia = await transferenciaService.create(req.body)
-    res.status(201).json(transferencia)
+    const validated = transferenciaCreateSchema.parse(req.body);
+    const transferencia = await transferenciaService.create(validated);
+    res.status(201).json({ success: true, data: transferencia });
   } catch (error: any) {
-    res.status(400).json({ message: error.message })
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ success: false, errors: error.errors });
+    }
+    next(error);
   }
-}
+};
 
-export const getTransferencias = async (req: Request, res: Response) => {
+// --- Listar todas ---
+export const getTransferencias = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const transferencias = await transferenciaService.getAll()
-    res.status(200).json(transferencias)
-  } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    const transferencias = await transferenciaService.getAll();
+    res.status(200).json({ success: true, data: transferencias });
+  } catch (error) {
+    next(error);
   }
-}
+};
 
-export const getTransferenciaById = async (req: Request, res: Response) => {
+// --- Buscar por ID ---
+export const getTransferenciaById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const transferencia = await transferenciaService.getById(req.params.id)
-    res.status(200).json(transferencia)
-  } catch (error: any) {
-    res.status(error.message.includes('não encontrada') ? 404 : 500).json({ message: error.message })
+    const transferencia = await transferenciaService.getById(req.params.id);
+    if (!transferencia) return res.status(404).json({ success: false, message: 'Transferência não encontrada.' });
+    res.status(200).json({ success: true, data: transferencia });
+  } catch (error) {
+    next(error);
   }
-}
+};
 
-export const updateTransferencia = async (req: Request, res: Response) => {
+// --- Atualizar ---
+export const updateTransferencia = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const transferencia = await transferenciaService.update(req.params.id, req.body)
-    res.status(200).json(transferencia)
+    const validated = transferenciaUpdateSchema.parse(req.body);
+    const transferencia = await transferenciaService.update(req.params.id, validated);
+    if (!transferencia) return res.status(404).json({ success: false, message: 'Transferência não encontrada.' });
+    res.status(200).json({ success: true, data: transferencia });
   } catch (error: any) {
-    res.status(error.message.includes('não encontrada') ? 404 : 400).json({ message: error.message })
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ success: false, errors: error.errors });
+    }
+    next(error);
   }
-}
+};
 
-export const deleteTransferencia = async (req: Request, res: Response) => {
+// --- Deletar ---
+export const deleteTransferencia = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await transferenciaService.delete(req.params.id)
-    res.status(200).json(result)
-  } catch (error: any) {
-    res.status(error.message.includes('não encontrada') ? 404 : 500).json({ message: error.message })
+    const deleted = await transferenciaService.delete(req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'Transferência não encontrada.' });
+    res.status(200).json({ success: true, message: 'Transferência excluída com sucesso.' });
+  } catch (error) {
+    next(error);
   }
-}
+};

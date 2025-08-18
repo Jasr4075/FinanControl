@@ -16,9 +16,14 @@ exports.loginUsuario = exports.registerUsuario = void 0;
 const UsuarioService_1 = require("../services/UsuarioService");
 const TokenService_1 = require("../services/TokenService");
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const usuario_schema_1 = require("../validators/usuario.schema");
+const zod_1 = require("zod");
+// --- Cadastro ---
 const registerUsuario = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const usuario = yield UsuarioService_1.UsuarioService.create(req.body);
+        // Valida com Zod
+        const parsedData = usuario_schema_1.usuarioCreateSchema.parse(req.body);
+        const usuario = yield UsuarioService_1.UsuarioService.create(parsedData);
         const token = TokenService_1.TokenService.gerarToken({
             id: usuario.id,
             username: usuario.username,
@@ -27,19 +32,30 @@ const registerUsuario = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         res.status(201).json({ user: usuario, token });
     }
     catch (err) {
+        if (err instanceof zod_1.z.ZodError) {
+            return res.status(400).json({ erros: err.errors });
+        }
         next(err);
     }
 });
 exports.registerUsuario = registerUsuario;
+// --- Login ---
 const loginUsuario = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { username, senha } = req.body;
+        // Validação simples para login
+        const loginSchema = zod_1.z.object({
+            username: zod_1.z.string().min(1, "Username é obrigatório"),
+            senha: zod_1.z.string().min(1, "Senha é obrigatória"),
+        });
+        const { username, senha } = loginSchema.parse(req.body);
         const usuario = yield UsuarioService_1.UsuarioService.findByUsernameRaw(username);
-        if (!usuario)
+        if (!usuario) {
             return res.status(401).json({ erro: 'Usuário ou senha inválidos.' });
+        }
         const senhaValida = yield bcrypt_1.default.compare(senha, usuario.hash);
-        if (!senhaValida)
+        if (!senhaValida) {
             return res.status(401).json({ erro: 'Usuário ou senha inválidos.' });
+        }
         const token = TokenService_1.TokenService.gerarToken({
             id: usuario.id,
             username: usuario.username,
@@ -48,6 +64,9 @@ const loginUsuario = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         res.json({ token, user: UsuarioService_1.UsuarioService.sanitizeUser(usuario) });
     }
     catch (err) {
+        if (err instanceof zod_1.z.ZodError) {
+            return res.status(400).json({ erros: err.errors });
+        }
         next(err);
     }
 });
