@@ -1,11 +1,18 @@
 import { Request, Response } from 'express'
 import { ContaService } from '../services/ContaService'
+import { contaCreateSchema, contaUpdateSchema } from '../validators/conta.schema'
 
 export const createConta = async (req: Request, res: Response) => {
   try {
-    const conta = await ContaService.create(req.body)
+    // valida entrada com zod
+    const data = contaCreateSchema.parse(req.body)
+
+    const conta = await ContaService.create(data)
     res.status(201).json({ success: true, data: conta })
   } catch (error: any) {
+    if (error.name === 'ZodError') {
+      return res.status(400).json({ success: false, errors: error.errors })
+    }
     res.status(400).json({ success: false, message: error.message })
   }
 }
@@ -31,9 +38,15 @@ export const getContaById = async (req: Request, res: Response) => {
 
 export const updateConta = async (req: Request, res: Response) => {
   try {
-    const conta = await ContaService.update(req.params.id, req.body)
+    // valida entrada com zod
+    const data = contaUpdateSchema.parse(req.body)
+
+    const conta = await ContaService.update(req.params.id, data)
     res.status(200).json({ success: true, data: conta })
   } catch (error: any) {
+    if (error.name === 'ZodError') {
+      return res.status(400).json({ success: false, errors: error.errors })
+    }
     if (error.message === 'Conta não encontrada.') {
       return res.status(404).json({ success: false, message: error.message })
     }

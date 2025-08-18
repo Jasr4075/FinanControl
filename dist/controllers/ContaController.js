@@ -11,12 +11,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteConta = exports.updateConta = exports.getContaById = exports.getContas = exports.createConta = void 0;
 const ContaService_1 = require("../services/ContaService");
+const conta_schema_1 = require("../validators/conta.schema");
 const createConta = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const conta = yield ContaService_1.ContaService.create(req.body);
+        // valida entrada com zod
+        const data = conta_schema_1.contaCreateSchema.parse(req.body);
+        const conta = yield ContaService_1.ContaService.create(data);
         res.status(201).json({ success: true, data: conta });
     }
     catch (error) {
+        if (error.name === 'ZodError') {
+            return res.status(400).json({ success: false, errors: error.errors });
+        }
         res.status(400).json({ success: false, message: error.message });
     }
 });
@@ -45,10 +51,15 @@ const getContaById = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 exports.getContaById = getContaById;
 const updateConta = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const conta = yield ContaService_1.ContaService.update(req.params.id, req.body);
+        // valida entrada com zod
+        const data = conta_schema_1.contaUpdateSchema.parse(req.body);
+        const conta = yield ContaService_1.ContaService.update(req.params.id, data);
         res.status(200).json({ success: true, data: conta });
     }
     catch (error) {
+        if (error.name === 'ZodError') {
+            return res.status(400).json({ success: false, errors: error.errors });
+        }
         if (error.message === 'Conta não encontrada.') {
             return res.status(404).json({ success: false, message: error.message });
         }
