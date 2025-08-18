@@ -81,6 +81,6 @@ export class UsuarioService {
   }
 
   static async findByUsernameRaw(username: string) {
-    return await Usuario.findOne({ where: { username } });
+    return await Usuario.scope('withHash').findOne({ where: { username } });
   }
 }

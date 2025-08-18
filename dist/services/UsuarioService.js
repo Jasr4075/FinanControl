@@ -83,7 +83,7 @@ class UsuarioService {
     }
     static findByUsernameRaw(username) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield Usuario_1.Usuario.findOne({ where: { username } });
+            return yield Usuario_1.Usuario.scope('withHash').findOne({ where: { username } });
         });
     }
 }

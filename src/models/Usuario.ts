@@ -68,8 +68,10 @@ Usuario.init(
             { fields: ['email'] },
             { fields: ['username'] },
         ],
-        defaultScope: {
-            attributes: { exclude: ['hash'] },
-        },
+        scopes: {
+            withHash: {
+              attributes: { include: ['hash'] },
+            },
+          },          
     }
 )
