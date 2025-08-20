@@ -1,8 +1,12 @@
 import { Conta } from '../models/Conta'
 import { Usuario } from '../models/Usuario'
+import { Cartao } from '../models/Cartao'
+
 
 const includeRelations = [
   { model: Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
+  { model: Cartao, as: 'cartoes', attributes: ['id', 'nome', 'type', 'creditLimit', 'active'] },
+
 ]
 
 export class ContaService {

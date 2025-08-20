@@ -12,8 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContaService = void 0;
 const Conta_1 = require("../models/Conta");
 const Usuario_1 = require("../models/Usuario");
+const Cartao_1 = require("../models/Cartao");
 const includeRelations = [
     { model: Usuario_1.Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
+    { model: Cartao_1.Cartao, as: 'cartoes', attributes: ['id', 'nome', 'type', 'creditLimit', 'active'] },
 ];
 class ContaService {
     static create(data) {
