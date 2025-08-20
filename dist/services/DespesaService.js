@@ -16,6 +16,8 @@ const Conta_1 = require("../models/Conta");
 const Cartao_1 = require("../models/Cartao");
 const Category_1 = require("../models/Category");
 const sequelize_1 = require("sequelize");
+const ParcelaService_1 = require("./ParcelaService");
+const date_fns_1 = require("date-fns");
 const includeRelations = [
     { model: Usuario_1.Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
     { model: Conta_1.Conta, as: 'conta', attributes: ['id', 'bancoNome'] },
@@ -23,12 +25,38 @@ const includeRelations = [
     { model: Category_1.Category, as: 'categoria', attributes: ['id', 'name'] },
 ];
 class DespesaService {
+    // static async create(data: any) {
+    //   const {
+    //     userId, contaId, cartaoId, categoryId,
+    //     descricao, valor, metodoPagamento, data: dataDespesa,
+    //     parcelado, numeroParcelas, juros, observacoes
+    //   } = data
+    //   if (!userId || !categoryId || !descricao || !valor || !metodoPagamento || !dataDespesa) {
+    //     throw new Error('Campos obrigatórios não preenchidos.')
+    //   }
+    //   const novaDespesa = await Despesa.create({
+    //     userId,
+    //     contaId,
+    //     cartaoId,
+    //     categoryId,
+    //     descricao,
+    //     valor,
+    //     metodoPagamento,
+    //     data: dataDespesa,
+    //     parcelado: parcelado || false,
+    //     numeroParcelas: numeroParcelas || 1,
+    //     juros: juros || 0,
+    //     observacoes
+    //   })
+    //   return await Despesa.findByPk(novaDespesa.id, { include: includeRelations })
+    // }
     static create(data) {
         return __awaiter(this, void 0, void 0, function* () {
             const { userId, contaId, cartaoId, categoryId, descricao, valor, metodoPagamento, data: dataDespesa, parcelado, numeroParcelas, juros, observacoes } = data;
             if (!userId || !categoryId || !descricao || !valor || !metodoPagamento || !dataDespesa) {
                 throw new Error('Campos obrigatórios não preenchidos.');
             }
+            // cria a despesa principal
             const novaDespesa = yield Despesa_1.Despesa.create({
                 userId,
                 contaId,
@@ -43,6 +71,20 @@ class DespesaService {
                 juros: juros || 0,
                 observacoes
             });
+            // se for parcelado, gera as parcelas
+            if (parcelado && numeroParcelas > 1) {
+                const valorParcela = valor / numeroParcelas;
+                for (let i = 1; i <= numeroParcelas; i++) {
+                    const dataVencimento = (0, date_fns_1.addMonths)(new Date(dataDespesa), i - 1);
+                    yield ParcelaService_1.ParcelaService.create({
+                        despesaId: novaDespesa.id,
+                        cartaoId: cartaoId || null, // se veio via cartão
+                        numeroParcela: i,
+                        valor: valorParcela,
+                        dataVencimento
+                    });
+                }
+            }
             return yield Despesa_1.Despesa.findByPk(novaDespesa.id, { include: includeRelations });
         });
     }

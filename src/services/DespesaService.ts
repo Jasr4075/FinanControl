@@ -4,6 +4,8 @@ import { Conta } from '../models/Conta'
 import { Cartao } from '../models/Cartao'
 import { Category } from '../models/Category'
 import { Op } from 'sequelize';
+import { ParcelaService } from './ParcelaService'
+import { addMonths } from 'date-fns'
 
 const includeRelations = [
   { model: Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
@@ -13,6 +15,35 @@ const includeRelations = [
 ]
 
 export class DespesaService {
+  // static async create(data: any) {
+  //   const {
+  //     userId, contaId, cartaoId, categoryId,
+  //     descricao, valor, metodoPagamento, data: dataDespesa,
+  //     parcelado, numeroParcelas, juros, observacoes
+  //   } = data
+
+  //   if (!userId || !categoryId || !descricao || !valor || !metodoPagamento || !dataDespesa) {
+  //     throw new Error('Campos obrigatórios não preenchidos.')
+  //   }
+
+  //   const novaDespesa = await Despesa.create({
+  //     userId,
+  //     contaId,
+  //     cartaoId,
+  //     categoryId,
+  //     descricao,
+  //     valor,
+  //     metodoPagamento,
+  //     data: dataDespesa,
+  //     parcelado: parcelado || false,
+  //     numeroParcelas: numeroParcelas || 1,
+  //     juros: juros || 0,
+  //     observacoes
+  //   })
+
+  //   return await Despesa.findByPk(novaDespesa.id, { include: includeRelations })
+  // }
+
   static async create(data: any) {
     const {
       userId, contaId, cartaoId, categoryId,
@@ -24,6 +55,7 @@ export class DespesaService {
       throw new Error('Campos obrigatórios não preenchidos.')
     }
 
+    // cria a despesa principal
     const novaDespesa = await Despesa.create({
       userId,
       contaId,
@@ -38,6 +70,23 @@ export class DespesaService {
       juros: juros || 0,
       observacoes
     })
+
+    // se for parcelado, gera as parcelas
+    if (parcelado && numeroParcelas > 1) {
+      const valorParcela = valor / numeroParcelas
+
+      for (let i = 1; i <= numeroParcelas; i++) {
+        const dataVencimento = addMonths(new Date(dataDespesa), i - 1)
+
+        await ParcelaService.create({
+          despesaId: novaDespesa.id,
+          cartaoId: cartaoId || null, // se veio via cartão
+          numeroParcela: i,
+          valor: valorParcela,
+          dataVencimento
+        })
+      }
+    }
 
     return await Despesa.findByPk(novaDespesa.id, { include: includeRelations })
   }
