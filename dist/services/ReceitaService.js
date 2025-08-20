@@ -14,6 +14,7 @@ const Receita_1 = require("../models/Receita");
 const Usuario_1 = require("../models/Usuario");
 const Conta_1 = require("../models/Conta");
 const Category_1 = require("../models/Category");
+const sequelize_1 = require("sequelize");
 const includeRelations = [
     { model: Usuario_1.Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
     { model: Conta_1.Conta, as: 'contas', attributes: ['id', 'bancoNome', 'conta'] },
@@ -53,6 +54,28 @@ class ReceitaService {
                 return null;
             yield receita.destroy();
             return true;
+        });
+    }
+    static getTotalMes(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+            const hoje = new Date();
+            return (yield Receita_1.Receita.sum('quantidade', {
+                where: {
+                    userId,
+                    data: { [sequelize_1.Op.between]: [inicioMes, hoje] }
+                }
+            })) || 0;
+        });
+    }
+    static getUltimas(userId_1) {
+        return __awaiter(this, arguments, void 0, function* (userId, limit = 10) {
+            return yield Receita_1.Receita.findAll({
+                where: { userId },
+                order: [['data', 'DESC']],
+                limit,
+                include: includeRelations,
+            });
         });
     }
 }

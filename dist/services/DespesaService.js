@@ -15,6 +15,7 @@ const Usuario_1 = require("../models/Usuario");
 const Conta_1 = require("../models/Conta");
 const Cartao_1 = require("../models/Cartao");
 const Category_1 = require("../models/Category");
+const sequelize_1 = require("sequelize");
 const includeRelations = [
     { model: Usuario_1.Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
     { model: Conta_1.Conta, as: 'conta', attributes: ['id', 'bancoNome'] },
@@ -74,6 +75,28 @@ class DespesaService {
                 throw new Error('Despesa não encontrada.');
             yield despesa.destroy();
             return true;
+        });
+    }
+    static getTotalMes(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+            const hoje = new Date();
+            return (yield Despesa_1.Despesa.sum('valor', {
+                where: {
+                    userId,
+                    data: { [sequelize_1.Op.between]: [inicioMes, hoje] }
+                }
+            })) || 0;
+        });
+    }
+    static getUltimas(userId_1) {
+        return __awaiter(this, arguments, void 0, function* (userId, limit = 10) {
+            return yield Despesa_1.Despesa.findAll({
+                where: { userId },
+                order: [['data', 'DESC']],
+                limit,
+                include: includeRelations,
+            });
         });
     }
 }

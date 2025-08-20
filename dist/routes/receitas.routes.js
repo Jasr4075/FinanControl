@@ -8,4 +8,6 @@ router.get('/', ReceitaController_1.getReceitas);
 router.get('/:id', ReceitaController_1.getReceitaById);
 router.put('/:id', ReceitaController_1.updateReceita);
 router.delete('/:id', ReceitaController_1.deleteReceita);
+router.get('/total-mes/:userId', ReceitaController_1.getTotalReceitasMes);
+router.get('/ultimas/:userId', ReceitaController_1.getUltimasReceitas);
 exports.default = router;

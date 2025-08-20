@@ -2,6 +2,7 @@ import { Receita } from '../models/Receita'
 import { Usuario } from '../models/Usuario'
 import { Conta } from '../models/Conta'
 import { Category } from '../models/Category'
+import { Op } from 'sequelize';
 
 const includeRelations = [
   { model: Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
@@ -49,5 +50,26 @@ export class ReceitaService {
 
     await receita.destroy()
     return true
+  }
+
+  static async getTotalMes(userId: string) {
+    const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+    const hoje = new Date()
+
+    return await Receita.sum('quantidade', {
+      where: {
+        userId,
+        data: { [Op.between]: [inicioMes, hoje] }
+      }
+    }) || 0
+  }
+
+  static async getUltimas(userId: string, limit = 10) {
+    return await Receita.findAll({
+      where: { userId },
+      order: [['data', 'DESC']],
+      limit,
+      include: includeRelations,
+    })
   }
 }

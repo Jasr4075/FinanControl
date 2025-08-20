@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteReceita = exports.updateReceita = exports.getReceitaById = exports.getReceitas = exports.createReceita = void 0;
+exports.getUltimasReceitas = exports.getTotalReceitasMes = exports.deleteReceita = exports.updateReceita = exports.getReceitaById = exports.getReceitas = exports.createReceita = void 0;
 const ReceitaService_1 = require("../services/ReceitaService");
 const receita_schema_1 = require("../validators/receita.schema");
 const zod_1 = __importDefault(require("zod"));
@@ -102,3 +102,23 @@ const deleteReceita = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.deleteReceita = deleteReceita;
+const getTotalReceitasMes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const total = yield ReceitaService_1.ReceitaService.getTotalMes(req.params.userId);
+        res.status(200).json({ success: true, total });
+    }
+    catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+exports.getTotalReceitasMes = getTotalReceitasMes;
+const getUltimasReceitas = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const receitas = yield ReceitaService_1.ReceitaService.getUltimas(req.params.userId, 15);
+        res.status(200).json({ success: true, data: receitas });
+    }
+    catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+exports.getUltimasReceitas = getUltimasReceitas;

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteDespesa = exports.updateDespesa = exports.getDespesaById = exports.getDespesas = exports.createDespesa = void 0;
+exports.getUltimasDespesas = exports.getTotalDespesasMes = exports.deleteDespesa = exports.updateDespesa = exports.getDespesaById = exports.getDespesas = exports.createDespesa = void 0;
 const DespesaService_1 = require("../services/DespesaService");
 const despesa_schema_1 = require("../validators/despesa.schema");
 const zod_1 = require("zod");
@@ -84,3 +84,23 @@ const deleteDespesa = (req, res, next) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.deleteDespesa = deleteDespesa;
+const getTotalDespesasMes = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const total = yield DespesaService_1.DespesaService.getTotalMes(req.params.userId);
+        res.status(200).json({ success: true, total });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.getTotalDespesasMes = getTotalDespesasMes;
+const getUltimasDespesas = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const despesas = yield DespesaService_1.DespesaService.getUltimas(req.params.userId, 15);
+        res.status(200).json({ success: true, data: despesas });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.getUltimasDespesas = getUltimasDespesas;

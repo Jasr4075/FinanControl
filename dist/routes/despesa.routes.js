@@ -8,4 +8,6 @@ router.get('/', DespesaController_1.getDespesas);
 router.get('/:id', DespesaController_1.getDespesaById);
 router.put('/:id', DespesaController_1.updateDespesa);
 router.delete('/:id', DespesaController_1.deleteDespesa);
+router.get('/total-mes/:userId', DespesaController_1.getTotalDespesasMes);
+router.get('/ultimas/:userId', DespesaController_1.getUltimasDespesas);
 exports.default = router;

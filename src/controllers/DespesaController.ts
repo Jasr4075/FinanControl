@@ -65,3 +65,21 @@ export const deleteDespesa = async (req: Request, res: Response, next: NextFunct
     next(error);
   }
 };
+
+export const getTotalDespesasMes = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const total = await DespesaService.getTotalMes(req.params.userId)
+    res.status(200).json({ success: true, total })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const getUltimasDespesas = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const despesas = await DespesaService.getUltimas(req.params.userId, 15)
+    res.status(200).json({ success: true, data: despesas })
+  } catch (error) {
+    next(error)
+  }
+}

@@ -88,3 +88,21 @@ export const deleteReceita = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: error.message })
   }
 }
+
+export const getTotalReceitasMes = async (req: Request, res: Response) => {
+  try {
+    const total = await ReceitaService.getTotalMes(req.params.userId)
+    res.status(200).json({ success: true, total })
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
+
+export const getUltimasReceitas = async (req: Request, res: Response) => {
+  try {
+    const receitas = await ReceitaService.getUltimas(req.params.userId, 15)
+    res.status(200).json({ success: true, data: receitas })
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
