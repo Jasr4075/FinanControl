@@ -22,7 +22,7 @@ export const despesaCreateSchema = z.object({
     })
         .min(0.01, { message: 'Valor deve ser maior que zero' }),
 
-    metodoPagamento: z.enum(['DINHEIRO', 'CARTAO', 'PIX', 'BOLETO', 'OUTRO'], {
+    metodoPagamento: z.enum(['PIX', 'CREDITO', 'DEBITO', 'DINHERO'], {
         required_error: 'Método de pagamento é obrigatório',
         invalid_type_error: 'Método de pagamento inválido',
     }),
@@ -60,7 +60,7 @@ export const despesaUpdateSchema = z.object({
     categoryId: z.string().optional(),
     descricao: z.string().min(1, { message: 'Descrição inválida' }).optional(),
     valor: z.coerce.number().min(0.01, { message: 'Valor deve ser maior que zero' }).optional(),
-    metodoPagamento: z.enum(['DINHEIRO', 'CARTAO', 'PIX', 'BOLETO', 'OUTRO']).optional(),
+    metodoPagamento: z.enum(['PIX', 'CREDITO', 'DEBITO', 'DINHERO']).optional(),
     data: z.coerce.date().optional(),
     parcelado: z.boolean().optional(),
     numeroParcelas: z.coerce.number().min(1).optional(),

@@ -18,7 +18,7 @@ exports.despesaCreateSchema = zod_1.z.object({
         invalid_type_error: 'Valor inválido',
     })
         .min(0.01, { message: 'Valor deve ser maior que zero' }),
-    metodoPagamento: zod_1.z.enum(['DINHEIRO', 'CARTAO', 'PIX', 'BOLETO', 'OUTRO'], {
+    metodoPagamento: zod_1.z.enum(['PIX', 'CREDITO', 'DEBITO', 'DINHERO'], {
         required_error: 'Método de pagamento é obrigatório',
         invalid_type_error: 'Método de pagamento inválido',
     }),
@@ -47,7 +47,7 @@ exports.despesaUpdateSchema = zod_1.z.object({
     categoryId: zod_1.z.string().optional(),
     descricao: zod_1.z.string().min(1, { message: 'Descrição inválida' }).optional(),
     valor: zod_1.z.coerce.number().min(0.01, { message: 'Valor deve ser maior que zero' }).optional(),
-    metodoPagamento: zod_1.z.enum(['DINHEIRO', 'CARTAO', 'PIX', 'BOLETO', 'OUTRO']).optional(),
+    metodoPagamento: zod_1.z.enum(['PIX', 'CREDITO', 'DEBITO', 'DINHERO']).optional(),
     data: zod_1.z.coerce.date().optional(),
     parcelado: zod_1.z.boolean().optional(),
     numeroParcelas: zod_1.z.coerce.number().min(1).optional(),
