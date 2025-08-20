@@ -8,4 +8,5 @@ router.get('/', ContaController_1.getContas);
 router.get('/:id', ContaController_1.getContaById);
 router.put('/:id', ContaController_1.updateConta);
 router.delete('/:id', ContaController_1.deleteConta);
+router.get('/user/:userId', ContaController_1.getContasByUserId);
 exports.default = router;

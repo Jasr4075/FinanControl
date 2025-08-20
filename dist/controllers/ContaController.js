@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteConta = exports.updateConta = exports.getContaById = exports.getContas = exports.createConta = void 0;
+exports.getContasByUserId = exports.deleteConta = exports.updateConta = exports.getContaById = exports.getContas = exports.createConta = void 0;
 const ContaService_1 = require("../services/ContaService");
 const conta_schema_1 = require("../validators/conta.schema");
 const zod_1 = require("zod");
@@ -82,3 +82,13 @@ const deleteConta = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.deleteConta = deleteConta;
+const getContasByUserId = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const contas = yield ContaService_1.ContaService.findByUserId(req.params.userId);
+        res.status(200).json({ success: true, data: contas });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.getContasByUserId = getContasByUserId;

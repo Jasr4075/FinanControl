@@ -384,3 +384,15 @@ O diagrama ER a seguir representa as principais entidades e relacionamentos do s
 > [Clique aqui para editar ou visualizar o diagrama no PlantText](https://www.planttext.com?text=hLVDZXCv4Bv7oZluWZYmit0bOX536b2adT5eVgIz8SUk9DQuxLwt6qt4y2vmGd3V9yYBRRdTITkEINg0M_kpNVxgSxcg-bLjgR5DASbReQYQQcMDbk_VNBu_qnpaUFIO8BOGoyRGpTVDVr2FHol1WJ1Xc8JngBuLggA6baGA1NPT0T76hlHuD1w1iiAkoKqDXdmSZmXv8lY4tDpC2ZTGj8G9kR96gAKRGqc5384LhLVXc1cW5lYfdP02Fwv52GvkAhuFVmhEFsLCDyfcA3J8R1QC7VtjYUJ52wS6HV-DGKj0df8BtLHKRRvI_9xgXO6NBzssELMtvuatT0cAhS-RSWucmZsP_OavbLGnj5404oML3XFr5Lr0ntz2NcijWQfM2oukm31mSBS12NTGWmEkoRIO_K7WRaAU_VcS_4MUFtlawVwiZbDg-00HEmzd1wuwrTbild5XDQfQRBxD_TUPgAtU4SRflqKfR2GF1iWKOsHEsMqiJWUc2hLpKjTuQa7N4p9Jra6yWN18cHKV83RuaugzkQj0rJ10D8RQ7X6HGysCgApGAWgeqWT7u6D5roKoE0DyXppG-MBsZmlSdDg5K2iGfXFSkULzyb4uKvWcf2mXYKBHurFFejDGu7inKCUqbBPGJyWrtDbV4JKWan4MlEI7j0rORv_XzkhtjMo38rHZBgGChLNK7H-8qgaVxchf1-_8mbARzO2ScDKe4s69oOm8JrYtf0T3Ew_HgmoVLBeIC-9g9zSQQA-TrIZgQIuOZ-ipmD5tckO8xh-Zr4k2XGaJHuRP0MUEqZdNLYm4deQlyO65fJqQwXehH0ZXYVnuqWavN09hZDj-RQYgNTfwC1TC2WNK5TIkeg4z49Rw591x2la4X6NmtyOLkz2es7mnmYMMAoph2gyE4pg699NUUjjrn140YYSXaRdAeRavAl_MKhOQdYuQ4tKX2o7XEhc-ffAQyaE7Ne6rJehZrt4Bwz3q1ogRXwK0ro8KK65P6zBY98K5x-eI5c0stnKJb6m-4zOsFQplRdAH45tK3-BYA77iJpA4Ozl6ZtOTpYF2VMWTQ6NYdiMt0WDoMoOKCgxxNgJuBGBC5DFbaExWbxe1VlHL3IdC8UystoooJVt2wF9qdwtL6V3t1zQsqx-_FpdH7tkU4_md4Kie3wt0m_35jlyjxGzBjwBR48Ek4uwHhWx7eAjPCHAMZNWcbypZ5LrAIS3-ySSJFhOoedZk2RXTdS0xhn8yEdKyQdyCkYdNICJ8paW8Rj-bsxxjadTSTktPtboVo_UcaaveRxu_CMmWF-cJa_lxZhMZsFLHFpAQBl1NdABvoqnNzLVq2eiV_eEFH_y3)
 
 ---
+
+## Tecnologias utilizadas:
+
+- **Node.js**: com Express para gerenciamento de rotas, bcrypt para autenticação de senhas e jsonwebtoken (JWT) para proteção e autenticação da API.
+- **Sequelize**: utilizado como ORM para comunicação com o banco de dados.
+- **Zod**: para definição e validação de schemas.
+- **PostgreSQL**: banco de dados principal.
+- **Railway**: hospedagem do banco e do servidor.
+- **Postman**: para realização de testes.
+- **GitHub**: repositório de versionamento do código.
+
+---

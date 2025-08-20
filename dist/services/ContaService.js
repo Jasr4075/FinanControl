@@ -63,5 +63,15 @@ class ContaService {
             return true;
         });
     }
+    static findByUserId(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!userId)
+                throw new Error('userId é obrigatório.');
+            return yield Conta_1.Conta.findAll({
+                where: { userId },
+                include: includeRelations,
+            });
+        });
+    }
 }
 exports.ContaService = ContaService;

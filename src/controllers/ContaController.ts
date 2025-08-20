@@ -69,3 +69,12 @@ export const deleteConta = async (req: Request, res: Response, next: NextFunctio
     next(error);
   }
 };
+
+export const getContasByUserId = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const contas = await ContaService.findByUserId(req.params.userId);
+    res.status(200).json({ success: true, data: contas });
+  } catch (error) {
+    next(error);
+  }
+};

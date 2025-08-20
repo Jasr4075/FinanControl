@@ -68,5 +68,14 @@ export class ContaService {
     await conta.destroy();
     return true;
   }
+
+  static async findByUserId(userId: string) {
+    if (!userId) throw new Error('userId é obrigatório.');
+  
+    return await Conta.findAll({
+      where: { userId },
+      include: includeRelations,
+    });
+  }
   
 }
