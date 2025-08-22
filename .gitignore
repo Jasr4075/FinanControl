@@ -8,7 +8,7 @@ yarn-error.log*
 .nyc_output/
 .parcel-cache/
 logs/
-dist/
+
 node_modules/
 # Build output
 build/

@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const CartaoController_1 = require("../controllers/CartaoController");
+const router = (0, express_1.Router)();
+router.post('/', CartaoController_1.createCartao);
+router.get('/', CartaoController_1.getCartoes);
+router.get('/:id', CartaoController_1.getCartaoById);
+router.put('/:id', CartaoController_1.updateCartao);
+router.delete('/:id', CartaoController_1.deleteCartao);
+exports.default = router;

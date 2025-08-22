@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const TransferenciaController_1 = require("../controllers/TransferenciaController");
+const router = (0, express_1.Router)();
+router.post('/', TransferenciaController_1.createTransferencia);
+router.get('/', TransferenciaController_1.getTransferencias);
+router.get('/:id', TransferenciaController_1.getTransferenciaById);
+router.put('/:id', TransferenciaController_1.updateTransferencia);
+router.delete('/:id', TransferenciaController_1.deleteTransferencia);
+exports.default = router;

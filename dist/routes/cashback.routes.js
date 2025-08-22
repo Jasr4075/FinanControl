@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const CashbackController_1 = require("../controllers/CashbackController");
+const router = (0, express_1.Router)();
+router.post('/', CashbackController_1.createCashback);
+router.get('/', CashbackController_1.getCashbacks);
+router.get('/:id', CashbackController_1.getCashbackById);
+router.put('/:id', CashbackController_1.updateCashback);
+router.delete('/:id', CashbackController_1.deleteCashback);
+exports.default = router;

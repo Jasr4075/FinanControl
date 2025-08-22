@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const ReceitaController_1 = require("../controllers/ReceitaController");
+const router = (0, express_1.Router)();
+router.post('/', ReceitaController_1.createReceita);
+router.get('/', ReceitaController_1.getReceitas);
+router.get('/:id', ReceitaController_1.getReceitaById);
+router.put('/:id', ReceitaController_1.updateReceita);
+router.delete('/:id', ReceitaController_1.deleteReceita);
+router.get('/total-mes/:userId', ReceitaController_1.getTotalReceitasMes);
+router.get('/ultimas/:userId', ReceitaController_1.getUltimasReceitas);
+exports.default = router;
