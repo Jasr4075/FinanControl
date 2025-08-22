@@ -3,6 +3,7 @@ import { Usuario } from '../models/Usuario'
 import { Conta } from '../models/Conta'
 import { Category } from '../models/Category'
 import { Op } from 'sequelize';
+import { sequelize } from '../config/config'
 
 const includeRelations = [
   { model: Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
@@ -20,12 +21,34 @@ export class ReceitaService {
     data: Date
     nota?: string | null
   }) {
-    const receita = await Receita.create({
-      ...data,
-      nota: data.nota ?? undefined,
-    })
+    // Começa uma transação
+    return await sequelize.transaction(async (t) => {
+      // Cria a receita
+      const receita = await Receita.create(
+        {
+          ...data,
+          nota: data.nota ?? undefined,
+        },
+        { transaction: t }
+      );
 
-    return Receita.findByPk(receita.id, { include: includeRelations })
+      // Atualiza o saldo da conta
+      const conta = await Conta.findByPk(data.accountId, { transaction: t });
+      if (!conta) throw new Error('Conta não encontrada.');
+
+      conta.saldo = (conta.saldo || 0) + data.quantidade;
+      await conta.save({ transaction: t });
+
+      // Retorna a receita com os relacionamentos
+      return Receita.findByPk(receita.id, {
+        include: [
+          { model: Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
+          { model: Conta, as: 'contas', attributes: ['id', 'bancoNome', 'conta'] },
+          { model: Category, as: 'categories', attributes: ['id', 'name'] },
+        ],
+        transaction: t,
+      });
+    });
   }
 
   static async findAll() {
