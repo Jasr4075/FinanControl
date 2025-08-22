@@ -5,27 +5,27 @@ import z from 'zod'
 
 export const createReceita = async (req: Request, res: Response) => {
   try {
-    // Valida os dados de entrada com o schema
-    const validatedData = receitaCreateSchema.parse(req.body)
+    const validatedData = receitaCreateSchema.parse(req.body);
 
-    const novaReceita = await ReceitaService.create(validatedData)
+    const novaReceita = await ReceitaService.create(validatedData);
 
-    res.status(201).json({ success: true, data: novaReceita })
+    res.status(201).json({ success: true, data: novaReceita });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      // Se for um erro de validação do Zod, retorna os erros de forma mais detalhada
       return res.status(400).json({
         success: false,
         message: 'Erro de validação',
-        errors: error.errors.map(err => ({
+        errors: error.errors.map((err) => ({
           path: err.path.join('.'),
-          message: err.message
-        }))
-      })
+          message: err.message,
+        })),
+      });
     }
-    res.status(400).json({ success: false, message: error.message })
+
+    res.status(400).json({ success: false, message: error.message });
   }
-}
+};
+
 
 export const getReceitas = async (req: Request, res: Response) => {
   try {
