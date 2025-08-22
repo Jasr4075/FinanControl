@@ -8,8 +8,8 @@ yarn-error.log*
 .nyc_output/
 .parcel-cache/
 logs/
-
-/node_modules/
+dist/
+node_modules/
 # Build output
 build/
 # Dependency directories
