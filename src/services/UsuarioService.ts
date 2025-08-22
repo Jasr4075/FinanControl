@@ -1,4 +1,5 @@
 import { Usuario } from '../models/Usuario';
+import { Conta } from '../models/Conta';
 import bcrypt from 'bcrypt';
 import { AppError } from '../middlewares/errorHandler';
 

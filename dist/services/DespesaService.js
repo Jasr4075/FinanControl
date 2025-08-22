@@ -71,14 +71,22 @@ class DespesaService {
                 juros: juros || 0,
                 observacoes
             });
-            // se for parcelado, gera as parcelas
+            // atualiza o saldo da conta se o método for PIX, DEBITO ou DINHEIRO
+            if (contaId && ['PIX', 'DEBITO', 'DINHEIRO'].includes(metodoPagamento)) {
+                const conta = yield Conta_1.Conta.findByPk(contaId);
+                if (!conta)
+                    throw new Error('Conta não encontrada.');
+                conta.saldo = Number(conta.saldo) - Number(valor);
+                yield conta.save();
+            }
+            // se for parcelado e pago no cartão, cria parcelas
             if (parcelado && numeroParcelas > 1) {
                 const valorParcela = valor / numeroParcelas;
                 for (let i = 1; i <= numeroParcelas; i++) {
                     const dataVencimento = (0, date_fns_1.addMonths)(new Date(dataDespesa), i - 1);
                     yield ParcelaService_1.ParcelaService.create({
                         despesaId: novaDespesa.id,
-                        cartaoId: cartaoId || null, // se veio via cartão
+                        cartaoId: cartaoId || null,
                         numeroParcela: i,
                         valor: valorParcela,
                         dataVencimento

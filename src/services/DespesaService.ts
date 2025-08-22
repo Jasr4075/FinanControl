@@ -71,16 +71,23 @@ export class DespesaService {
       observacoes
     })
 
-    // se for parcelado, gera as parcelas
+    // atualiza o saldo da conta se o método for PIX, DEBITO ou DINHEIRO
+    if (contaId && ['PIX', 'DEBITO', 'DINHEIRO'].includes(metodoPagamento)) {
+      const conta = await Conta.findByPk(contaId)
+      if (!conta) throw new Error('Conta não encontrada.')
+
+      conta.saldo = Number(conta.saldo) - Number(valor)
+      await conta.save()
+    }
+
+    // se for parcelado e pago no cartão, cria parcelas
     if (parcelado && numeroParcelas > 1) {
       const valorParcela = valor / numeroParcelas
-
       for (let i = 1; i <= numeroParcelas; i++) {
         const dataVencimento = addMonths(new Date(dataDespesa), i - 1)
-
         await ParcelaService.create({
           despesaId: novaDespesa.id,
-          cartaoId: cartaoId || null, // se veio via cartão
+          cartaoId: cartaoId || null,
           numeroParcela: i,
           valor: valorParcela,
           dataVencimento
@@ -90,7 +97,7 @@ export class DespesaService {
 
     return await Despesa.findByPk(novaDespesa.id, { include: includeRelations })
   }
-
+  
   static async getAll() {
     return await Despesa.findAll({ include: includeRelations })
   }

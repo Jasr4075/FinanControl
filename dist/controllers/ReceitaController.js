@@ -18,19 +18,21 @@ const receita_schema_1 = require("../validators/receita.schema");
 const zod_1 = __importDefault(require("zod"));
 const createReceita = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        // Valida os dados de entrada com o schema
         const validatedData = receita_schema_1.receitaCreateSchema.parse(req.body);
         const novaReceita = yield ReceitaService_1.ReceitaService.create(validatedData);
         res.status(201).json({ success: true, data: novaReceita });
     }
     catch (error) {
         if (error instanceof zod_1.default.ZodError) {
+            // Se for um erro de validação do Zod, retorna os erros de forma mais detalhada
             return res.status(400).json({
                 success: false,
                 message: 'Erro de validação',
-                errors: error.errors.map((err) => ({
+                errors: error.errors.map(err => ({
                     path: err.path.join('.'),
-                    message: err.message,
-                })),
+                    message: err.message
+                }))
             });
         }
         res.status(400).json({ success: false, message: error.message });

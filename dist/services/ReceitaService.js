@@ -15,7 +15,6 @@ const Usuario_1 = require("../models/Usuario");
 const Conta_1 = require("../models/Conta");
 const Category_1 = require("../models/Category");
 const sequelize_1 = require("sequelize");
-const config_1 = require("../config/config");
 const includeRelations = [
     { model: Usuario_1.Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
     { model: Conta_1.Conta, as: 'contas', attributes: ['id', 'bancoNome', 'conta'] },
@@ -24,27 +23,16 @@ const includeRelations = [
 class ReceitaService {
     static create(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Começa uma transação
-            return yield config_1.sequelize.transaction((t) => __awaiter(this, void 0, void 0, function* () {
-                var _a;
-                // Cria a receita
-                const receita = yield Receita_1.Receita.create(Object.assign(Object.assign({}, data), { nota: (_a = data.nota) !== null && _a !== void 0 ? _a : undefined }), { transaction: t });
-                // Atualiza o saldo da conta
-                const conta = yield Conta_1.Conta.findByPk(data.accountId, { transaction: t });
-                if (!conta)
-                    throw new Error('Conta não encontrada.');
-                conta.saldo = (conta.saldo || 0) + data.quantidade;
-                yield conta.save({ transaction: t });
-                // Retorna a receita com os relacionamentos
-                return Receita_1.Receita.findByPk(receita.id, {
-                    include: [
-                        { model: Usuario_1.Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
-                        { model: Conta_1.Conta, as: 'contas', attributes: ['id', 'bancoNome', 'conta'] },
-                        { model: Category_1.Category, as: 'categories', attributes: ['id', 'name'] },
-                    ],
-                    transaction: t,
-                });
-            }));
+            var _a;
+            // Cria a receita
+            const receita = yield Receita_1.Receita.create(Object.assign(Object.assign({}, data), { nota: (_a = data.nota) !== null && _a !== void 0 ? _a : undefined }));
+            // Atualiza o saldo da conta
+            const conta = yield Conta_1.Conta.findByPk(data.accountId);
+            if (!conta)
+                throw new Error('Conta não encontrada.');
+            conta.saldo = Number(conta.saldo) + Number(data.quantidade);
+            yield conta.save();
+            return Receita_1.Receita.findByPk(receita.id, { include: includeRelations });
         });
     }
     static findAll() {
