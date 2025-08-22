@@ -14,7 +14,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsuarioService = void 0;
 const Usuario_1 = require("../models/Usuario");
+const Conta_1 = require("../models/Conta");
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const config_1 = require("../config/config");
 const errorHandler_1 = require("../middlewares/errorHandler");
 class UsuarioService {
     // Remove campo hash antes de enviar para o cliente
@@ -28,15 +30,29 @@ class UsuarioService {
         return __awaiter(this, void 0, void 0, function* () {
             const { nome, email, telefone, username, senha, role = 'CLIENT' } = data;
             const hash = yield bcrypt_1.default.hash(senha, 10);
-            const usuario = yield Usuario_1.Usuario.create({
-                nome,
-                email,
-                telefone,
-                username,
-                hash,
-                role,
-            });
-            return this.sanitizeUser(usuario);
+            return yield config_1.sequelize.transaction((t) => __awaiter(this, void 0, void 0, function* () {
+                // 1️⃣ Cria o usuário
+                const usuario = yield Usuario_1.Usuario.create({
+                    nome,
+                    email,
+                    telefone,
+                    username,
+                    hash,
+                    role,
+                }, { transaction: t });
+                // 2️⃣ Cria a conta EFETIVO
+                yield Conta_1.Conta.create({
+                    userId: usuario.id,
+                    type: 'EFETIVO',
+                    bancoNome: 'Dinheiro Físico',
+                    agencia: '0001',
+                    conta: '000000-0',
+                    saldo: 0,
+                    efetivo: true,
+                    cdiPercent: 0,
+                }, { transaction: t });
+                return this.sanitizeUser(usuario);
+            }));
         });
     }
     static findAll() {

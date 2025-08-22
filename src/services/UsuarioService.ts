@@ -1,6 +1,7 @@
 import { Usuario } from '../models/Usuario';
 import { Conta } from '../models/Conta';
 import bcrypt from 'bcrypt';
+import { sequelize } from '../config/config';
 import { AppError } from '../middlewares/errorHandler';
 
 export class UsuarioService {
@@ -22,17 +23,38 @@ export class UsuarioService {
   }) {
     const { nome, email, telefone, username, senha, role = 'CLIENT' } = data;
     const hash = await bcrypt.hash(senha, 10);
-  
-    const usuario = await Usuario.create({
-      nome,
-      email,
-      telefone,
-      username,
-      hash,
-      role,
+
+    return await sequelize.transaction(async (t) => {
+      // 1️⃣ Cria o usuário
+      const usuario = await Usuario.create(
+        {
+          nome,
+          email,
+          telefone,
+          username,
+          hash,
+          role,
+        },
+        { transaction: t }
+      );
+
+      // 2️⃣ Cria a conta EFETIVO
+      await Conta.create(
+        {
+          userId: usuario.id,
+          type: 'EFETIVO',
+          bancoNome: 'Dinheiro Físico',
+          agencia: '0001',
+          conta: '000000-0',
+          saldo: 0,
+          efetivo: true,
+          cdiPercent: 0,
+        },
+        { transaction: t }
+      );
+
+      return this.sanitizeUser(usuario);
     });
-  
-    return this.sanitizeUser(usuario);
   }
 
   static async findAll() {
