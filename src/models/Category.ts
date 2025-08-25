@@ -13,6 +13,7 @@ export class Category extends Model<
 > {
   declare id: CreationOptional<string>;
   declare name: string;
+  declare type: 'DESPESA' | 'RECEITA' | 'META' | 'TRANSACAO_RECORRENTE'; // nuevo campo
   declare createdAt: CreationOptional<Date>;
 }
 
@@ -25,6 +26,10 @@ Category.init(
     },
     name: {
       type: DataTypes.STRING,
+      allowNull: false
+    },
+    type: {
+      type: DataTypes.ENUM('DESPESA', 'RECEITA', 'META', 'TRANSACAO_RECORRENTE'),
       allowNull: false
     },
     createdAt: {

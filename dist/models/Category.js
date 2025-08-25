@@ -16,6 +16,10 @@ Category.init({
         type: sequelize_1.DataTypes.STRING,
         allowNull: false
     },
+    type: {
+        type: sequelize_1.DataTypes.ENUM('DESPESA', 'RECEITA', 'META', 'TRANSACAO_RECORRENTE'),
+        allowNull: false
+    },
     createdAt: {
         type: sequelize_1.DataTypes.DATE,
         defaultValue: sequelize_1.DataTypes.NOW

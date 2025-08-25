@@ -12,11 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoryService = void 0;
 const Category_1 = require("../models/Category");
 class CategoryService {
-    static create(name) {
+    static create(name, type) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!name)
                 throw new Error('Nome da categoria é obrigatório.');
-            return yield Category_1.Category.create({ name });
+            if (!type)
+                throw new Error('Tipo da categoria é obrigatório.');
+            return yield Category_1.Category.create({ name, type });
         });
     }
     static findAll() {
@@ -29,14 +31,15 @@ class CategoryService {
             return yield Category_1.Category.findByPk(id);
         });
     }
-    static update(id, name) {
+    static update(id, name, type) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!name)
                 throw new Error('Nome da categoria é obrigatório para atualização.');
             const category = yield Category_1.Category.findByPk(id);
             if (!category)
                 throw new Error('Categoria não encontrada.');
-            yield category.update({ name });
+            // Solo actualizamos type si se pasa
+            yield category.update(Object.assign({ name }, (type && { type })));
             return category;
         });
     }
