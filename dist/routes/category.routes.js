@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const CategoryController_1 = require("../controllers/CategoryController");
 const router = (0, express_1.Router)();
-router.post('/', CategoryController_1.createCategory);
+router.post('/', CategoryController_1.createCategoriesBulk);
 router.get('/', CategoryController_1.getCategories);
 router.get('/:id', CategoryController_1.getCategoryById);
 router.put('/:id', CategoryController_1.updateCategory);

@@ -12,13 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoryService = void 0;
 const Category_1 = require("../models/Category");
 class CategoryService {
-    static create(name, type) {
+    static createBulk(categories) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!name)
-                throw new Error('Nome da categoria é obrigatório.');
-            if (!type)
-                throw new Error('Tipo da categoria é obrigatório.');
-            return yield Category_1.Category.create({ name, type });
+            if (!Array.isArray(categories) || categories.length === 0) {
+                throw new Error('Debe enviar un array de categorías.');
+            }
+            return yield Category_1.Category.bulkCreate(categories);
         });
     }
     static findAll() {

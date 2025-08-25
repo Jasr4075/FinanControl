@@ -9,25 +9,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteCategory = exports.updateCategory = exports.getCategoryById = exports.getCategories = exports.createCategory = void 0;
+exports.deleteCategory = exports.updateCategory = exports.getCategoryById = exports.getCategories = exports.createCategoriesBulk = void 0;
 const CategoryService_1 = require("../services/CategoryService");
-const createCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, type } = req.body;
+const createCategoriesBulk = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!name) {
-            return res.status(400).json({ success: false, message: 'Nome da categoria é obrigatório.' });
-        }
-        if (!type) {
-            return res.status(400).json({ success: false, message: 'Tipo da categoria é obrigatório.' });
-        }
-        const category = yield CategoryService_1.CategoryService.create(name, type);
-        res.status(201).json({ success: true, data: category });
+        const categories = req.body;
+        const inserted = yield CategoryService_1.CategoryService.createBulk(categories);
+        res.status(201).json({ success: true, data: inserted });
     }
     catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
 });
-exports.createCategory = createCategory;
+exports.createCategoriesBulk = createCategoriesBulk;
 const getCategories = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const categories = yield CategoryService_1.CategoryService.findAll();
@@ -51,9 +45,8 @@ const getCategoryById = (req, res) => __awaiter(void 0, void 0, void 0, function
 });
 exports.getCategoryById = getCategoryById;
 const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, type } = req.body;
     try {
-        const category = yield CategoryService_1.CategoryService.update(req.params.id, name, type);
+        const category = yield CategoryService_1.CategoryService.update(req.params.id, req.body.name);
         res.status(200).json({ success: true, data: category });
     }
     catch (error) {

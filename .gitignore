@@ -12,6 +12,7 @@ logs/
 node_modules/
 # Build output
 build/
+dist/
 # Dependency directories
 jspm_packages/
 # TypeScript

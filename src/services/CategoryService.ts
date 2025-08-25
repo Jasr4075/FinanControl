@@ -1,12 +1,12 @@
 import { Category } from '../models/Category'
 
 export class CategoryService {
-  static async create(name: string, type: 'DESPESA' | 'RECEITA' | 'META' | 'TRANSACAO_RECORRENTE') {
-    if (!name) throw new Error('Nome da categoria é obrigatório.')
-    if (!type) throw new Error('Tipo da categoria é obrigatório.')
-
-    return await Category.create({ name, type })
+static async createBulk(categories: { name: string; type: 'DESPESA' | 'RECEITA' | 'META' | 'TRANSACAO_RECORRENTE' }[]) {
+  if (!Array.isArray(categories) || categories.length === 0) {
+    throw new Error('Debe enviar un array de categorías.')
   }
+  return await Category.bulkCreate(categories)
+}
 
   static async findAll() {
     return await Category.findAll()

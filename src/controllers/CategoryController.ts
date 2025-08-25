@@ -1,19 +1,11 @@
 import { Request, Response } from 'express'
 import { CategoryService } from '../services/CategoryService'
 
-export const createCategory = async (req: Request, res: Response) => {
-  const { name, type } = req.body
-  
+export const createCategoriesBulk = async (req: Request, res: Response) => {
   try {
-    if (!name) {
-      return res.status(400).json({ success: false, message: 'Nome da categoria é obrigatório.' })
-    }
-    if (!type) {
-      return res.status(400).json({ success: false, message: 'Tipo da categoria é obrigatório.' })
-    }
-
-    const category = await CategoryService.create(name, type)
-    res.status(201).json({ success: true, data: category })
+    const categories = req.body
+    const inserted = await CategoryService.createBulk(categories)
+    res.status(201).json({ success: true, data: inserted })
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message })
   }
@@ -40,10 +32,8 @@ export const getCategoryById = async (req: Request, res: Response) => {
 }
 
 export const updateCategory = async (req: Request, res: Response) => {
-  const { name, type } = req.body
-
   try {
-    const category = await CategoryService.update(req.params.id, name, type)
+    const category = await CategoryService.update(req.params.id, req.body.name)
     res.status(200).json({ success: true, data: category })
   } catch (error: any) {
     if (error.message === 'Categoria não encontrada.') {

@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import {
-    createCategory,
+    createCategoriesBulk,
     getCategories,
     getCategoryById,
     updateCategory,
@@ -9,7 +9,7 @@ import {
 
 const router = Router()
 
-router.post('/', createCategory)
+router.post('/', createCategoriesBulk)
 router.get('/', getCategories)
 router.get('/:id', getCategoryById)
 router.put('/:id', updateCategory)
