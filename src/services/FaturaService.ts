@@ -5,6 +5,27 @@ const includeRelations = [
 ]
 
 export class FaturaService {
+  /**
+   * Encontra uma fatura pelo cartão + mês + ano ou cria uma nova se não existir.
+   * Não marca como paga e inicia valorTotal em 0.
+   */
+  static async findOrCreate(cartaoId: string, mes: number, ano: number) {
+    if (!cartaoId || !mes || !ano) throw new Error('Parâmetros insuficientes para localizar/criar fatura.')
+    if (mes < 1 || mes > 12) throw new Error('Mês inválido. Deve estar entre 1 e 12.')
+
+    let fatura = await Fatura.findOne({ where: { cartaoId, mes, ano } })
+    if (!fatura) {
+      fatura = await Fatura.create({
+        cartaoId,
+        mes,
+        ano,
+        valorTotal: 0,
+        paga: false,
+        dataPagamento: null,
+      })
+    }
+    return fatura
+  }
   static async create(data: {
     cartaoId: string
     mes: number

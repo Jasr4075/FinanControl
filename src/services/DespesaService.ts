@@ -71,7 +71,7 @@ export class DespesaService {
       observacoes
     })
 
-    // atualiza o saldo da conta se o método for PIX, DEBITO ou DINHEIRO
+    // atualiza o saldo da conta se o método NÃO for crédito (PIX, DEBITO ou DINHEIRO)
     if (contaId && ['PIX', 'DEBITO', 'DINHEIRO'].includes(metodoPagamento)) {
       const conta = await Conta.findByPk(contaId)
       if (!conta) throw new Error('Conta não encontrada.')
@@ -80,17 +80,31 @@ export class DespesaService {
       await conta.save()
     }
 
-    // se for parcelado e pago no cartão, cria parcelas
-    if (parcelado && numeroParcelas > 1) {
+    // Regras para crédito: sempre criar parcelas vinculadas a faturas
+    if (metodoPagamento === 'CREDITO' && cartaoId) {
+      const totalParcelas = parcelado && numeroParcelas > 1 ? numeroParcelas : 1
+      const valorParcela = parcelado && numeroParcelas > 1 ? valor / numeroParcelas : valor
+      for (let i = 1; i <= totalParcelas; i++) {
+        const dataVencimento = addMonths(new Date(dataDespesa), i - 1)
+        await ParcelaService.create({
+          despesaId: novaDespesa.id,
+          cartaoId,
+          numeroParcela: i,
+          valor: valorParcela,
+          dataVencimento,
+        })
+      }
+    } else if (parcelado && numeroParcelas > 1) {
+      // Parcelado mas não é crédito -> cria registros de parcelas sem cartao/fatura (se regra de negócio exigir)
       const valorParcela = valor / numeroParcelas
       for (let i = 1; i <= numeroParcelas; i++) {
         const dataVencimento = addMonths(new Date(dataDespesa), i - 1)
         await ParcelaService.create({
           despesaId: novaDespesa.id,
-          cartaoId: cartaoId || null,
+          cartaoId: null,
           numeroParcela: i,
           valor: valorParcela,
-          dataVencimento
+          dataVencimento,
         })
       }
     }
