@@ -55,6 +55,11 @@ export class DespesaService {
       throw new Error('Campos obrigatórios não preenchidos.')
     }
 
+    // Regra: parcelamento somente permitido para compras no cartão (CREDITO)
+    if (parcelado && metodoPagamento !== 'CREDITO') {
+      throw new Error('Parcelamento só é permitido para método CREDITO.')
+    }
+
     // cria a despesa principal
     const novaDespesa = await Despesa.create({
       userId,
@@ -89,19 +94,6 @@ export class DespesaService {
         await ParcelaService.create({
           despesaId: novaDespesa.id,
           cartaoId,
-          numeroParcela: i,
-          valor: valorParcela,
-          dataVencimento,
-        })
-      }
-    } else if (parcelado && numeroParcelas > 1) {
-      // Parcelado mas não é crédito -> cria registros de parcelas sem cartao/fatura (se regra de negócio exigir)
-      const valorParcela = valor / numeroParcelas
-      for (let i = 1; i <= numeroParcelas; i++) {
-        const dataVencimento = addMonths(new Date(dataDespesa), i - 1)
-        await ParcelaService.create({
-          despesaId: novaDespesa.id,
-          cartaoId: null,
           numeroParcela: i,
           valor: valorParcela,
           dataVencimento,
