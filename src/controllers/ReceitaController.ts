@@ -91,7 +91,18 @@ export const deleteReceita = async (req: Request, res: Response) => {
 
 export const getTotalReceitasMes = async (req: Request, res: Response) => {
   try {
-    const total = await ReceitaService.getTotalMes(req.params.userId)
+    const { ano, mes } = req.query
+    let total: number
+    if (ano && mes) {
+      const anoNum = Number(ano)
+      const mesNum = Number(mes)
+      if (!anoNum || !mesNum || mesNum < 1 || mesNum > 12) {
+        return res.status(400).json({ success: false, message: 'Parâmetros ano/mes inválidos.' })
+      }
+      total = await ReceitaService.getTotalByMonth(req.params.userId, anoNum, mesNum)
+    } else {
+      total = await ReceitaService.getTotalMes(req.params.userId)
+    }
     res.status(200).json({ success: true, total })
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message })

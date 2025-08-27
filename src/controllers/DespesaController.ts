@@ -68,7 +68,18 @@ export const deleteDespesa = async (req: Request, res: Response, next: NextFunct
 
 export const getTotalDespesasMes = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const total = await DespesaService.getTotalMes(req.params.userId)
+    const { ano, mes } = req.query
+    let total: number
+    if (ano && mes) {
+      const anoNum = Number(ano)
+      const mesNum = Number(mes)
+      if (!anoNum || !mesNum || mesNum < 1 || mesNum > 12) {
+        return res.status(400).json({ success: false, message: 'Parâmetros ano/mes inválidos.' })
+      }
+      total = await DespesaService.getTotalByMonth(req.params.userId, anoNum, mesNum)
+    } else {
+      total = await DespesaService.getTotalMes(req.params.userId)
+    }
     res.status(200).json({ success: true, total })
   } catch (error) {
     next(error)

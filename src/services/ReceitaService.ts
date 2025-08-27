@@ -108,6 +108,14 @@ export class ReceitaService {
     }) || 0
   }
 
+  static async getTotalByMonth(userId: string, ano: number, mes: number) { // mes 1-12
+    const inicio = new Date(ano, mes - 1, 1)
+    const fim = new Date(ano, mes, 0, 23, 59, 59, 999)
+    return await Receita.sum('quantidade', {
+      where: { userId, data: { [Op.between]: [inicio, fim] } }
+    }) || 0
+  }
+
   static async getUltimas(userId: string, limit = 10) {
     return await Receita.findAll({
       where: { userId },
