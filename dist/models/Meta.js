@@ -60,6 +60,7 @@ Meta.init({
         { fields: ['usuario_id'] },
         { fields: ['category_id'] },
         { fields: ['month', 'year'] },
+        { unique: true, fields: ['usuario_id', 'category_id', 'month', 'year'] },
     ],
 });
 Meta.belongsTo(Usuario_1.Usuario, {

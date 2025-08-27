@@ -83,7 +83,7 @@ Receita.belongsTo(Usuario_1.Usuario, {
 });
 Receita.belongsTo(Conta_1.Conta, {
     foreignKey: 'accountId',
-    as: 'contas',
+    as: 'conta',
 });
 Receita.belongsTo(Category_1.Category, {
     foreignKey: 'categoryId',

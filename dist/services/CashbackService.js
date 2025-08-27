@@ -13,6 +13,9 @@ exports.CashbackService = void 0;
 const Cashback_1 = require("../models/Cashback");
 const Cartao_1 = require("../models/Cartao");
 const Despesa_1 = require("../models/Despesa");
+const Conta_1 = require("../models/Conta");
+const FaturaService_1 = require("./FaturaService");
+const config_1 = require("../config/config");
 const includeRelations = [
     { model: Cartao_1.Cartao, as: 'cartao', attributes: ['id', 'nome'] },
     { model: Despesa_1.Despesa, as: 'despesa', attributes: ['id', 'descricao', 'valor'] },
@@ -20,18 +23,47 @@ const includeRelations = [
 class CashbackService {
     static create(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { cartaoId, quantidade, description, despesaId, creditDate } = data;
+            const { cartaoId, quantidade, description, despesaId, creditDate, appliedTo = 'FATURA' } = data;
             if (!cartaoId || !quantidade || !description || !despesaId || !creditDate) {
                 throw new Error('Campos obrigatórios não preenchidos.');
             }
-            const novoCashback = yield Cashback_1.Cashback.create({
-                cartaoId,
-                quantidade,
-                description,
-                despesaId,
-                creditDate,
-            });
-            return yield Cashback_1.Cashback.findByPk(novoCashback.id, { include: includeRelations });
+            if (Number(quantidade) <= 0)
+                throw new Error('Quantidade deve ser positiva.');
+            const dup = yield Cashback_1.Cashback.findOne({ where: { despesaId } });
+            if (dup)
+                throw new Error('Já existe cashback para esta despesa.');
+            return yield config_1.sequelize.transaction((t) => __awaiter(this, void 0, void 0, function* () {
+                const cashback = yield Cashback_1.Cashback.create({
+                    cartaoId,
+                    quantidade,
+                    description,
+                    despesaId,
+                    creditDate,
+                    appliedTo,
+                    applied: false,
+                }, { transaction: t });
+                // Aplicação imediata
+                if (appliedTo === 'FATURA') {
+                    // localizar fatura do mês da data do cashback
+                    const mes = new Date(creditDate).getMonth() + 1;
+                    const ano = new Date(creditDate).getFullYear();
+                    const fatura = yield FaturaService_1.FaturaService.findOrCreate(cartaoId, mes, ano);
+                    yield FaturaService_1.FaturaService.aplicarDelta(fatura.id, -Number(quantidade));
+                }
+                else if (appliedTo === 'CONTA') {
+                    const cartao = yield Cartao_1.Cartao.findByPk(cartaoId, { transaction: t });
+                    if (cartao) {
+                        const conta = yield Conta_1.Conta.findByPk(cartao.contaId, { transaction: t });
+                        if (conta) {
+                            conta.saldo = Number(conta.saldo) + Number(quantidade);
+                            yield conta.save({ transaction: t });
+                        }
+                    }
+                }
+                cashback.applied = true;
+                yield cashback.save({ transaction: t });
+                return yield Cashback_1.Cashback.findByPk(cashback.id, { include: includeRelations, transaction: t });
+            }));
         });
     }
     static findAll() {

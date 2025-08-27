@@ -47,6 +47,12 @@ Cartao.init({
         allowNull: false,
         defaultValue: 0,
     },
+    creditUsed: {
+        type: sequelize_1.DataTypes.DECIMAL(15, 2),
+        allowNull: false,
+        defaultValue: 0,
+        field: 'credit_used'
+    },
     hasCashback: {
         type: sequelize_1.DataTypes.BOOLEAN,
         allowNull: false,
@@ -80,6 +86,8 @@ Cartao.init({
         { fields: ['user_id'] },
         { fields: ['conta_id'] },
         { fields: ['type'] },
+        // Opcional: evitar nomes duplicados por usuário
+        { unique: false, fields: ['user_id', 'nome'] },
     ],
 });
 Usuario_1.Usuario.hasMany(Cartao, {

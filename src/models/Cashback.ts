@@ -19,6 +19,8 @@ export class Cashback extends Model<
     declare description: string
     declare despesaId: string
     declare creditDate: Date
+    declare appliedTo: 'FATURA' | 'CONTA'
+    declare applied: boolean
 }
 
 Cashback.init(
@@ -61,6 +63,17 @@ Cashback.init(
             type: DataTypes.DATE,
             allowNull: false,
         },
+        appliedTo: {
+            type: DataTypes.ENUM('FATURA', 'CONTA'),
+            allowNull: false,
+            defaultValue: 'FATURA',
+            field: 'applied_to'
+        },
+        applied: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+        },
     },
     {
         sequelize,
@@ -70,6 +83,7 @@ Cashback.init(
         underscored: true,
         indexes: [
             { fields: ['cartao_id'] },
+            { unique: false, fields: ['despesa_id'] },
         ],
     }
 )

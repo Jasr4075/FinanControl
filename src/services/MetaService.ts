@@ -1,4 +1,6 @@
 import { Meta } from '../models/Meta'
+import { Despesa } from '../models/Despesa'
+import { Op } from 'sequelize'
 
 const includeRelations = [
   { model: Meta.sequelize!.models.Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
@@ -44,6 +46,32 @@ export class MetaService {
       throw new Error('Meta não encontrada.')
     }
     return meta
+  }
+
+  static async progresso(id: string) {
+    const meta = await Meta.findByPk(id)
+    if (!meta) throw new Error('Meta não encontrada.')
+    const inicio = new Date(meta.year, meta.month - 1, 1)
+    const fim = new Date(meta.year, meta.month, 0)
+    const gasto = await Despesa.sum('valor', {
+      where: {
+        categoryId: meta.categoryId,
+        userId: meta.usuarioId,
+        data: { [Op.between]: [inicio, fim] }
+      }
+    }) || 0
+    const limit = Number(meta.limitAmount)
+    const percentual = limit > 0 ? +( (Number(gasto) / limit) * 100 ).toFixed(2) : 0
+    return {
+      metaId: meta.id,
+      categoria: meta.categoryId,
+      periodo: { mes: meta.month, ano: meta.year },
+      limite: limit,
+      gasto: Number(gasto),
+      restante: Math.max(0, limit - Number(gasto)),
+      percentual: percentual > 100 ? 100 : percentual,
+      excedido: Number(gasto) > limit
+    }
   }
 
   static async update(id: string, data: any) {

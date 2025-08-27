@@ -46,6 +46,17 @@ Cashback.init({
         type: sequelize_1.DataTypes.DATE,
         allowNull: false,
     },
+    appliedTo: {
+        type: sequelize_1.DataTypes.ENUM('FATURA', 'CONTA'),
+        allowNull: false,
+        defaultValue: 'FATURA',
+        field: 'applied_to'
+    },
+    applied: {
+        type: sequelize_1.DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    },
 }, {
     sequelize: config_1.sequelize,
     modelName: 'Cashback',
@@ -54,6 +65,7 @@ Cashback.init({
     underscored: true,
     indexes: [
         { fields: ['cartao_id'] },
+        { unique: false, fields: ['despesa_id'] },
     ],
 });
 Despesa_1.Despesa.hasMany(Cashback, {

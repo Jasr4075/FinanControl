@@ -17,13 +17,15 @@ const Category_1 = require("../models/Category");
 const sequelize_1 = require("sequelize");
 const includeRelations = [
     { model: Usuario_1.Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
-    { model: Conta_1.Conta, as: 'contas', attributes: ['id', 'bancoNome', 'conta'] },
+    { model: Conta_1.Conta, as: 'conta', attributes: ['id', 'bancoNome', 'conta'] },
     { model: Category_1.Category, as: 'categories', attributes: ['id', 'name'] },
 ];
 class ReceitaService {
     static create(data) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a;
+            if (Number(data.quantidade) <= 0)
+                throw new Error('Quantidade deve ser maior que zero.');
             // Cria a receita
             const receita = yield Receita_1.Receita.create(Object.assign(Object.assign({}, data), { nota: (_a = data.nota) !== null && _a !== void 0 ? _a : undefined }));
             // Atualiza o saldo da conta
@@ -40,6 +42,25 @@ class ReceitaService {
             return Receita_1.Receita.findAll({ include: includeRelations });
         });
     }
+    static list(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { userId, page = 1, pageSize = 20, dataInicio, dataFim, categoryId, accountId } = params;
+            const where = { userId };
+            if (dataInicio && dataFim)
+                where.data = { [sequelize_1.Op.between]: [dataInicio, dataFim] };
+            else if (dataInicio)
+                where.data = { [sequelize_1.Op.gte]: dataInicio };
+            else if (dataFim)
+                where.data = { [sequelize_1.Op.lte]: dataFim };
+            if (categoryId)
+                where.categoryId = categoryId;
+            if (accountId)
+                where.accountId = accountId;
+            const offset = (page - 1) * pageSize;
+            const { rows, count } = yield Receita_1.Receita.findAndCountAll({ where, limit: pageSize, offset, order: [['data', 'DESC']], include: includeRelations });
+            return { data: rows, total: count, page, pageSize, totalPages: Math.ceil(count / pageSize) };
+        });
+    }
     static findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             return Receita_1.Receita.findByPk(id, { include: includeRelations });
@@ -50,6 +71,16 @@ class ReceitaService {
             const receita = yield Receita_1.Receita.findByPk(id);
             if (!receita)
                 return null;
+            const conta = yield Conta_1.Conta.findByPk(receita.accountId);
+            // Ajuste de saldo se quantidade alterada
+            if (updates.quantidade && Number(updates.quantidade) <= 0) {
+                throw new Error('Quantidade deve ser maior que zero.');
+            }
+            if (updates.quantidade && conta) {
+                const delta = Number(updates.quantidade) - Number(receita.quantidade);
+                conta.saldo = Number(conta.saldo) + delta;
+                yield conta.save();
+            }
             yield receita.update(updates);
             return Receita_1.Receita.findByPk(id, { include: includeRelations });
         });
@@ -59,6 +90,11 @@ class ReceitaService {
             const receita = yield Receita_1.Receita.findByPk(id);
             if (!receita)
                 return null;
+            const conta = yield Conta_1.Conta.findByPk(receita.accountId);
+            if (conta) {
+                conta.saldo = Number(conta.saldo) - Number(receita.quantidade);
+                yield conta.save();
+            }
             yield receita.destroy();
             return true;
         });

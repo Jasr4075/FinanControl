@@ -25,6 +25,7 @@ export class Cartao extends Model<
     declare closingDay: number
     declare dueDay: number
     declare active: boolean
+    declare creditUsed: number
 }
 
 Cartao.init(
@@ -67,6 +68,12 @@ Cartao.init(
             allowNull: false,
             defaultValue: 0,
         },
+        creditUsed: {
+            type: DataTypes.DECIMAL(15, 2),
+            allowNull: false,
+            defaultValue: 0,
+            field: 'credit_used'
+        },
         hasCashback: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
@@ -101,6 +108,8 @@ Cartao.init(
             { fields: ['user_id'] },
             { fields: ['conta_id'] },
             { fields: ['type'] },
+            // Opcional: evitar nomes duplicados por usuário
+            { unique: false, fields: ['user_id', 'nome'] },
         ],
     }
 )

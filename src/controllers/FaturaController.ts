@@ -52,3 +52,48 @@ export const deleteFatura = async (req: Request, res: Response) => {
     res.status(error.message === 'Fatura não encontrada.' ? 404 : 500).json({ success: false, message: error.message })
   }
 }
+
+export const getFaturaDetalhe = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    const detalhe = await FaturaService.detalhe(id)
+    res.status(200).json({ success: true, data: detalhe })
+  } catch (error: any) {
+    res.status(error.message === 'Fatura não encontrada.' ? 404 : 500).json({ success: false, message: error.message })
+  }
+}
+
+export const getFaturaAtualPorCartao = async (req: Request, res: Response) => {
+  try {
+    const { cartaoId } = req.params
+    const detalhe = await FaturaService.atual(cartaoId)
+    res.status(200).json({ success: true, data: detalhe })
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message })
+  }
+}
+
+export const getFaturaPorMes = async (req: Request, res: Response) => {
+  try {
+    const { cartaoId } = req.params
+    const mes = parseInt(req.query.mes as string, 10)
+    const ano = parseInt(req.query.ano as string, 10)
+    if (!mes || !ano) return res.status(400).json({ success: false, message: 'mes e ano são obrigatórios' })
+    const detalhe = await FaturaService.byCartaoMes(cartaoId, mes, ano, true)
+    res.status(200).json({ success: true, data: detalhe })
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message })
+  }
+}
+
+export const listFaturasPorCartao = async (req: Request, res: Response) => {
+  try {
+    const { cartaoId } = req.params
+    const page = parseInt((req.query.page as string) || '1', 10)
+    const pageSize = parseInt((req.query.pageSize as string) || '6', 10)
+    const lista = await FaturaService.listByCartao(cartaoId, page, pageSize)
+    res.status(200).json({ success: true, data: lista })
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message })
+  }
+}

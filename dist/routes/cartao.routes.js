@@ -6,6 +6,7 @@ const router = (0, express_1.Router)();
 router.post('/', CartaoController_1.createCartao);
 router.get('/', CartaoController_1.getCartoes);
 router.get('/:id', CartaoController_1.getCartaoById);
+router.get('/:id/resumo', CartaoController_1.getCartaoResumo);
 router.put('/:id', CartaoController_1.updateCartao);
 router.delete('/:id', CartaoController_1.deleteCartao);
 exports.default = router;

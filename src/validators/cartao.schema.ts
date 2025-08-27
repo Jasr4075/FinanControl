@@ -24,19 +24,24 @@ export const cartaoCreateSchema = z.object({
     .optional()
     .default(0),
 
+  creditLimit: z.number()
+    .min(0, 'Limite não pode ser negativo')
+    .optional()
+    .default(0),
+
   closingDay: z.coerce.number({
     required_error: 'Dia de fechamento é obrigatório',
     invalid_type_error: 'Dia de fechamento inválido',
   })
-    .min(1, { message: 'Dia de fechamento inválido' })
-    .max(31, { message: 'Dia de fechamento inválido' }),
+  .min(1, { message: 'Dia de fechamento inválido' })
+  .max(28, { message: 'Dia de fechamento deve ser até 28' }),
 
   dueDay: z.coerce.number({
     required_error: 'Dia de vencimento é obrigatório',
     invalid_type_error: 'Dia de vencimento inválido',
   })
-    .min(1, { message: 'Dia de vencimento inválido' })
-    .max(31, { message: 'Dia de vencimento inválido' }),
+  .min(1, { message: 'Dia de vencimento inválido' })
+  .max(28, { message: 'Dia de vencimento deve ser até 28' }),
 
   active: z.boolean()
     .optional()

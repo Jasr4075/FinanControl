@@ -9,14 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteCartao = exports.updateCartao = exports.getCartaoById = exports.getCartoes = exports.createCartao = void 0;
+exports.deleteCartao = exports.updateCartao = exports.getCartaoResumo = exports.getCartaoById = exports.getCartoes = exports.createCartao = void 0;
 const CartaoService_1 = require("../services/CartaoService");
 const cartao_schema_1 = require("../validators/cartao.schema");
 const zod_1 = require("zod");
 // --- Criar cartão ---
 const createCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const validatedCartao = cartao_schema_1.cartaoCreateSchema.parse(req.body);
+        const authUser = req.user;
+        const userId = (authUser === null || authUser === void 0 ? void 0 : authUser.id) || (authUser === null || authUser === void 0 ? void 0 : authUser.userId) || (authUser === null || authUser === void 0 ? void 0 : authUser.sub);
+        if (!userId)
+            return res.status(400).json({ success: false, message: 'Usuário não identificado.' });
+        // Força userId do token e ajusta tipos numéricos vindos como string
+        const payload = Object.assign(Object.assign({}, req.body), { userId, creditLimit: req.body.creditLimit !== undefined ? Number(req.body.creditLimit) : undefined, cashbackPercent: req.body.cashbackPercent !== undefined ? Number(req.body.cashbackPercent) : undefined, closingDay: req.body.closingDay, dueDay: req.body.dueDay });
+        const validatedCartao = cartao_schema_1.cartaoCreateSchema.parse(payload);
         const cartao = yield CartaoService_1.CartaoService.create(validatedCartao);
         res.status(201).json({ success: true, data: cartao });
     }
@@ -29,9 +35,13 @@ const createCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.createCartao = createCartao;
 // --- Listar todos os cartões ---
-const getCartoes = (_req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const getCartoes = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const cartoes = yield CartaoService_1.CartaoService.findAll();
+        const user = req.user;
+        const userId = (user === null || user === void 0 ? void 0 : user.id) || (user === null || user === void 0 ? void 0 : user.userId) || (user === null || user === void 0 ? void 0 : user.sub);
+        if (!userId)
+            return res.status(400).json({ success: false, message: 'Usuário não identificado no token.' });
+        const cartoes = yield CartaoService_1.CartaoService.findAllByUser(userId);
         res.status(200).json({ success: true, data: cartoes });
     }
     catch (error) {
@@ -52,6 +62,16 @@ const getCartaoById = (req, res, next) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.getCartaoById = getCartaoById;
+const getCartaoResumo = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const resumo = yield CartaoService_1.CartaoService.resumo(req.params.id);
+        res.status(200).json({ success: true, data: resumo });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.getCartaoResumo = getCartaoResumo;
 // --- Atualizar cartão ---
 const updateCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {

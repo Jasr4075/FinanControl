@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteFatura = exports.updateFatura = exports.getFaturaById = exports.getFaturas = exports.createFatura = void 0;
+exports.listFaturasPorCartao = exports.getFaturaPorMes = exports.getFaturaAtualPorCartao = exports.getFaturaDetalhe = exports.deleteFatura = exports.updateFatura = exports.getFaturaById = exports.getFaturas = exports.createFatura = void 0;
 const FaturaService_1 = require("../services/FaturaService");
 const createFatura = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -66,3 +66,53 @@ const deleteFatura = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.deleteFatura = deleteFatura;
+const getFaturaDetalhe = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        const detalhe = yield FaturaService_1.FaturaService.detalhe(id);
+        res.status(200).json({ success: true, data: detalhe });
+    }
+    catch (error) {
+        res.status(error.message === 'Fatura não encontrada.' ? 404 : 500).json({ success: false, message: error.message });
+    }
+});
+exports.getFaturaDetalhe = getFaturaDetalhe;
+const getFaturaAtualPorCartao = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { cartaoId } = req.params;
+        const detalhe = yield FaturaService_1.FaturaService.atual(cartaoId);
+        res.status(200).json({ success: true, data: detalhe });
+    }
+    catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+});
+exports.getFaturaAtualPorCartao = getFaturaAtualPorCartao;
+const getFaturaPorMes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { cartaoId } = req.params;
+        const mes = parseInt(req.query.mes, 10);
+        const ano = parseInt(req.query.ano, 10);
+        if (!mes || !ano)
+            return res.status(400).json({ success: false, message: 'mes e ano são obrigatórios' });
+        const detalhe = yield FaturaService_1.FaturaService.byCartaoMes(cartaoId, mes, ano, true);
+        res.status(200).json({ success: true, data: detalhe });
+    }
+    catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+});
+exports.getFaturaPorMes = getFaturaPorMes;
+const listFaturasPorCartao = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { cartaoId } = req.params;
+        const page = parseInt(req.query.page || '1', 10);
+        const pageSize = parseInt(req.query.pageSize || '6', 10);
+        const lista = yield FaturaService_1.FaturaService.listByCartao(cartaoId, page, pageSize);
+        res.status(200).json({ success: true, data: lista });
+    }
+    catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+});
+exports.listFaturasPorCartao = listFaturasPorCartao;

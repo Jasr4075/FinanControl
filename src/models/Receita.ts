@@ -104,7 +104,7 @@ Receita.belongsTo(Usuario, {
 
 Receita.belongsTo(Conta, {
   foreignKey: 'accountId',
-  as: 'contas',
+  as: 'conta',
 })
 
 Receita.belongsTo(Category, {

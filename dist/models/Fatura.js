@@ -40,6 +40,12 @@ Fatura.init({
         allowNull: false,
         defaultValue: 0,
     },
+    valorPago: {
+        type: sequelize_1.DataTypes.DECIMAL(15, 2),
+        allowNull: false,
+        defaultValue: 0,
+        field: 'valor_pago'
+    },
     paga: {
         type: sequelize_1.DataTypes.BOOLEAN,
         allowNull: false,
@@ -58,6 +64,7 @@ Fatura.init({
     indexes: [
         { fields: ['cartao_id'] },
         { fields: ['mes', 'ano'] },
+        { unique: true, fields: ['cartao_id', 'mes', 'ano'] },
     ],
 });
 Cartao_1.Cartao.hasMany(Fatura, {

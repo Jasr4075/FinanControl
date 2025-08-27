@@ -18,6 +18,7 @@ export class Fatura extends Model<
     declare mes: number
     declare ano: number
     declare valorTotal: number
+    declare valorPago: number
     declare paga: boolean
     declare dataPagamento: Date | null
 }
@@ -56,6 +57,12 @@ Fatura.init(
             allowNull: false,
             defaultValue: 0,
         },
+        valorPago: {
+            type: DataTypes.DECIMAL(15, 2),
+            allowNull: false,
+            defaultValue: 0,
+            field: 'valor_pago'
+        },
         paga: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
@@ -75,6 +82,7 @@ Fatura.init(
         indexes: [
             { fields: ['cartao_id'] },
             { fields: ['mes', 'ano'] },
+            { unique: true, fields: ['cartao_id', 'mes', 'ano'] },
         ],
     }
 )

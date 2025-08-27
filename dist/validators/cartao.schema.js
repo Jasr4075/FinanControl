@@ -20,18 +20,22 @@ exports.cartaoCreateSchema = zod_1.z.object({
         .min(0, 'Percentual de cashback não pode ser negativo')
         .optional()
         .default(0),
+    creditLimit: zod_1.z.number()
+        .min(0, 'Limite não pode ser negativo')
+        .optional()
+        .default(0),
     closingDay: zod_1.z.coerce.number({
         required_error: 'Dia de fechamento é obrigatório',
         invalid_type_error: 'Dia de fechamento inválido',
     })
         .min(1, { message: 'Dia de fechamento inválido' })
-        .max(31, { message: 'Dia de fechamento inválido' }),
+        .max(28, { message: 'Dia de fechamento deve ser até 28' }),
     dueDay: zod_1.z.coerce.number({
         required_error: 'Dia de vencimento é obrigatório',
         invalid_type_error: 'Dia de vencimento inválido',
     })
         .min(1, { message: 'Dia de vencimento inválido' })
-        .max(31, { message: 'Dia de vencimento inválido' }),
+        .max(28, { message: 'Dia de vencimento deve ser até 28' }),
     active: zod_1.z.boolean()
         .optional()
         .default(true),

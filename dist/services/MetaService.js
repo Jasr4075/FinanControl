@@ -11,6 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MetaService = void 0;
 const Meta_1 = require("../models/Meta");
+const Despesa_1 = require("../models/Despesa");
+const sequelize_1 = require("sequelize");
 const includeRelations = [
     { model: Meta_1.Meta.sequelize.models.Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
     { model: Meta_1.Meta.sequelize.models.Category, as: 'categoria', attributes: ['id', 'name'] },
@@ -47,6 +49,34 @@ class MetaService {
                 throw new Error('Meta não encontrada.');
             }
             return meta;
+        });
+    }
+    static progresso(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const meta = yield Meta_1.Meta.findByPk(id);
+            if (!meta)
+                throw new Error('Meta não encontrada.');
+            const inicio = new Date(meta.year, meta.month - 1, 1);
+            const fim = new Date(meta.year, meta.month, 0);
+            const gasto = (yield Despesa_1.Despesa.sum('valor', {
+                where: {
+                    categoryId: meta.categoryId,
+                    userId: meta.usuarioId,
+                    data: { [sequelize_1.Op.between]: [inicio, fim] }
+                }
+            })) || 0;
+            const limit = Number(meta.limitAmount);
+            const percentual = limit > 0 ? +((Number(gasto) / limit) * 100).toFixed(2) : 0;
+            return {
+                metaId: meta.id,
+                categoria: meta.categoryId,
+                periodo: { mes: meta.month, ano: meta.year },
+                limite: limit,
+                gasto: Number(gasto),
+                restante: Math.max(0, limit - Number(gasto)),
+                percentual: percentual > 100 ? 100 : percentual,
+                excedido: Number(gasto) > limit
+            };
         });
     }
     static update(id, data) {
