@@ -86,7 +86,19 @@ const deleteDespesa = (req, res, next) => __awaiter(void 0, void 0, void 0, func
 exports.deleteDespesa = deleteDespesa;
 const getTotalDespesasMes = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const total = yield DespesaService_1.DespesaService.getTotalMes(req.params.userId);
+        const { ano, mes } = req.query;
+        let total;
+        if (ano && mes) {
+            const anoNum = Number(ano);
+            const mesNum = Number(mes);
+            if (!anoNum || !mesNum || mesNum < 1 || mesNum > 12) {
+                return res.status(400).json({ success: false, message: 'Parâmetros ano/mes inválidos.' });
+            }
+            total = yield DespesaService_1.DespesaService.getTotalByMonth(req.params.userId, anoNum, mesNum);
+        }
+        else {
+            total = yield DespesaService_1.DespesaService.getTotalMes(req.params.userId);
+        }
         res.status(200).json({ success: true, total });
     }
     catch (error) {

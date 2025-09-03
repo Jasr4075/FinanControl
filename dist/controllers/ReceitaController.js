@@ -104,7 +104,19 @@ const deleteReceita = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 exports.deleteReceita = deleteReceita;
 const getTotalReceitasMes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const total = yield ReceitaService_1.ReceitaService.getTotalMes(req.params.userId);
+        const { ano, mes } = req.query;
+        let total;
+        if (ano && mes) {
+            const anoNum = Number(ano);
+            const mesNum = Number(mes);
+            if (!anoNum || !mesNum || mesNum < 1 || mesNum > 12) {
+                return res.status(400).json({ success: false, message: 'Parâmetros ano/mes inválidos.' });
+            }
+            total = yield ReceitaService_1.ReceitaService.getTotalByMonth(req.params.userId, anoNum, mesNum);
+        }
+        else {
+            total = yield ReceitaService_1.ReceitaService.getTotalMes(req.params.userId);
+        }
         res.status(200).json({ success: true, total });
     }
     catch (error) {

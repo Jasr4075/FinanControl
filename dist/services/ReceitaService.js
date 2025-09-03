@@ -111,6 +111,15 @@ class ReceitaService {
             })) || 0;
         });
     }
+    static getTotalByMonth(userId, ano, mes) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const inicio = new Date(ano, mes - 1, 1);
+            const fim = new Date(ano, mes, 0, 23, 59, 59, 999);
+            return (yield Receita_1.Receita.sum('quantidade', {
+                where: { userId, data: { [sequelize_1.Op.between]: [inicio, fim] } }
+            })) || 0;
+        });
+    }
     static getUltimas(userId_1) {
         return __awaiter(this, arguments, void 0, function* (userId, limit = 10) {
             return yield Receita_1.Receita.findAll({
