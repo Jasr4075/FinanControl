@@ -44,7 +44,7 @@ class UsuarioService {
                 yield Conta_1.Conta.create({
                     userId: usuario.id,
                     type: 'EFETIVO',
-                    bancoNome: 'Dinheiro Físico',
+                    bancoNome: 'Dinheiro em espécie',
                     agencia: '0001',
                     conta: '000000-0',
                     saldo: 0,
