@@ -14,16 +14,12 @@ import transferenciaRoutes from './transferencia.routes';
 import notificacaoRoutes from './notificacao.routes';
 import settingRoutes from './setting.routes';
 import authRoutes from './auth.routes';
-import webhookRoutes from './webhook.routes'
-import pagamentoRoutes from './pagamento.routes'
 import refreshTokenRoutes from './refreshToken.routes';
 
 import { autenticarRequisicao } from '../middlewares/autenticacao';
 
 const router = Router();
 
-router.use('/webhook', webhookRoutes)
-router.use('/pagamentos', pagamentoRoutes)
 
 // Rutas de usuarios
 router.use('/usuarios', usuarioRoutes);

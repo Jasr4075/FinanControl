@@ -14,5 +14,4 @@ require("./Meta");
 require("./Setting");
 require("./Notificacao");
 require("./TransacoesRecorrentes");
-require("./EventoWebHook");
 require("./RefreshToken");

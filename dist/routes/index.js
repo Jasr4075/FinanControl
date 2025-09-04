@@ -19,13 +19,9 @@ const transferencia_routes_1 = __importDefault(require("./transferencia.routes")
 const notificacao_routes_1 = __importDefault(require("./notificacao.routes"));
 const setting_routes_1 = __importDefault(require("./setting.routes"));
 const auth_routes_1 = __importDefault(require("./auth.routes"));
-const webhook_routes_1 = __importDefault(require("./webhook.routes"));
-const pagamento_routes_1 = __importDefault(require("./pagamento.routes"));
 const refreshToken_routes_1 = __importDefault(require("./refreshToken.routes"));
 const autenticacao_1 = require("../middlewares/autenticacao");
 const router = (0, express_1.Router)();
-router.use('/webhook', webhook_routes_1.default);
-router.use('/pagamentos', pagamento_routes_1.default);
 // Rutas de usuarios
 router.use('/usuarios', usuario_routes_1.default);
 // Rutas protegidas por JWT
