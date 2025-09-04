@@ -1,7 +1,6 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { RefreshToken } from '../models/RefreshToken';
 import { v4 as uuidv4 } from 'uuid';
-import { Usuario } from '../models/Usuario';
 const secret = process.env.JWT_SECRET || 'supersecret';
 
 export class TokenService {
