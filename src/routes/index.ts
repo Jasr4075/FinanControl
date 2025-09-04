@@ -15,6 +15,7 @@ import notificacaoRoutes from './notificacao.routes';
 import settingRoutes from './setting.routes';
 import authRoutes from './auth.routes';
 import refreshTokenRoutes from './refreshToken.routes';
+import mercadopagoRoutes from './mercadopago.routes';
 
 import { autenticarRequisicao } from '../middlewares/autenticacao';
 
@@ -38,7 +39,7 @@ router.use('/transacoes-recorrentes', autenticarRequisicao, transacoesRecorrente
 router.use('/transferencias', autenticarRequisicao, transferenciaRoutes);
 router.use('/notificacoes', autenticarRequisicao, notificacaoRoutes);
 router.use('/settings', autenticarRequisicao, settingRoutes);
-
+router.use('/mercadopago', autenticarRequisicao, mercadopagoRoutes);
 
 // Rutas públicas (login / registro / refresh)
 router.use('/auth', authRoutes);

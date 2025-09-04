@@ -3,6 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const AuthController_1 = require("../controllers/AuthController");
 const router = (0, express_1.Router)();
-router.post('/login', AuthController_1.loginUsuario);
-router.post('/register', AuthController_1.registerUsuario);
+router.get('/login', AuthController_1.loginMercadoPago);
+router.get('/callback', AuthController_1.callbackMercadoPago);
 exports.default = router;
