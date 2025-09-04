@@ -42,6 +42,18 @@ Usuario.init({
         allowNull: false,
         defaultValue: 'CLIENT',
     },
+    mp_access_token: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
+    mp_refresh_token: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
+    mp_expires_in: {
+        type: sequelize_1.DataTypes.DATE,
+        allowNull: true,
+    },
 }, {
     sequelize: config_1.sequelize,
     modelName: 'Usuario',

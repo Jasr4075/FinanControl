@@ -5,4 +5,6 @@ const AuthController_1 = require("../controllers/AuthController");
 const router = (0, express_1.Router)();
 router.post('/login', AuthController_1.loginUsuario);
 router.post('/register', AuthController_1.registerUsuario);
+router.get('/mp/login', AuthController_1.loginMercadoPago);
+router.get('/mp/callback', AuthController_1.callbackMercadoPago);
 exports.default = router;

@@ -18,6 +18,10 @@ export class Usuario extends Model<
     declare username: string
     declare hash: string
     declare role: 'ADMIN' | 'CLIENT'
+    declare mp_access_token: string | null
+    declare mp_refresh_token: string | null
+    declare mp_expires_in: Date | null
+
 }
 
 Usuario.init(
@@ -57,6 +61,18 @@ Usuario.init(
             allowNull: false,
             defaultValue: 'CLIENT',
         },
+        mp_access_token: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        mp_refresh_token: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        mp_expires_in: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
     },
     {
         sequelize,
@@ -70,8 +86,8 @@ Usuario.init(
         ],
         scopes: {
             withHash: {
-              attributes: { include: ['hash'] },
+                attributes: { include: ['hash'] },
             },
-          },          
+        },
     }
 )
