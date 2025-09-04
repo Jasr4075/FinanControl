@@ -16,7 +16,7 @@ import settingRoutes from './setting.routes';
 import authRoutes from './auth.routes';
 import webhookRoutes from './webhook.routes'
 import pagamentoRoutes from './pagamento.routes'
-
+import refreshTokenRoutes from './refreshToken.routes';
 
 import { autenticarRequisicao } from '../middlewares/autenticacao';
 
@@ -43,7 +43,9 @@ router.use('/transferencias', autenticarRequisicao, transferenciaRoutes);
 router.use('/notificacoes', autenticarRequisicao, notificacaoRoutes);
 router.use('/settings', autenticarRequisicao, settingRoutes);
 
-// Rutas públicas (login / registro)
+
+// Rutas públicas (login / registro / refresh)
 router.use('/auth', authRoutes);
+router.use('/token', refreshTokenRoutes);
 
 export default router;

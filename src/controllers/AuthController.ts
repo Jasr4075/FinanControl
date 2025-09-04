@@ -17,8 +17,9 @@ export const registerUsuario = async (req: Request, res: Response, next: NextFun
       username: usuario.username,
       role: usuario.role,
     });
+    const refreshToken = await TokenService.gerarRefreshToken(usuario.id);
 
-    res.status(201).json({ user: usuario, token });
+    res.status(201).json({ user: usuario, token, refreshToken: refreshToken.token });
   } catch (err) {
     if (err instanceof z.ZodError) {
       return res.status(400).json({ erros: err.errors });
@@ -53,8 +54,9 @@ export const loginUsuario = async (req: Request, res: Response, next: NextFuncti
       username: usuario.username,
       role: usuario.role,
     });
+    const refreshToken = await TokenService.gerarRefreshToken(usuario.id);
 
-    res.json({ token, user: UsuarioService.sanitizeUser(usuario) });
+    res.json({ token, refreshToken: refreshToken.token, user: UsuarioService.sanitizeUser(usuario) });
   } catch (err) {
     if (err instanceof z.ZodError) {
       return res.status(400).json({ erros: err.errors });
