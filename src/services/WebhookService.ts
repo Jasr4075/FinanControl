@@ -1,4 +1,4 @@
-import { EventoWebhook } from '../models/EventoWebhook'
+import { EventoWebhook } from '../models/EventoWebHook'
 import mercadoPago from '../utils/mercadopago'
 import { v4 as uuidv4 } from 'uuid'
 import { ReceitaService } from './ReceitaService'

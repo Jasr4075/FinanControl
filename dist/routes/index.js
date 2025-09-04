@@ -21,6 +21,7 @@ const setting_routes_1 = __importDefault(require("./setting.routes"));
 const auth_routes_1 = __importDefault(require("./auth.routes"));
 const webhook_routes_1 = __importDefault(require("./webhook.routes"));
 const pagamento_routes_1 = __importDefault(require("./pagamento.routes"));
+const refreshToken_routes_1 = __importDefault(require("./refreshToken.routes"));
 const autenticacao_1 = require("../middlewares/autenticacao");
 const router = (0, express_1.Router)();
 router.use('/webhook', webhook_routes_1.default);
@@ -41,6 +42,7 @@ router.use('/transacoes-recorrentes', autenticacao_1.autenticarRequisicao, trans
 router.use('/transferencias', autenticacao_1.autenticarRequisicao, transferencia_routes_1.default);
 router.use('/notificacoes', autenticacao_1.autenticarRequisicao, notificacao_routes_1.default);
 router.use('/settings', autenticacao_1.autenticarRequisicao, setting_routes_1.default);
-// Rutas públicas (login / registro)
+// Rutas públicas (login / registro / refresh)
 router.use('/auth', auth_routes_1.default);
+router.use('/token', refreshToken_routes_1.default);
 exports.default = router;

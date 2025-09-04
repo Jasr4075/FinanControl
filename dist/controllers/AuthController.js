@@ -29,7 +29,8 @@ const registerUsuario = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             username: usuario.username,
             role: usuario.role,
         });
-        res.status(201).json({ user: usuario, token });
+        const refreshToken = yield TokenService_1.TokenService.gerarRefreshToken(usuario.id);
+        res.status(201).json({ user: usuario, token, refreshToken: refreshToken.token });
     }
     catch (err) {
         if (err instanceof zod_1.z.ZodError) {
@@ -61,7 +62,8 @@ const loginUsuario = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             username: usuario.username,
             role: usuario.role,
         });
-        res.json({ token, user: UsuarioService_1.UsuarioService.sanitizeUser(usuario) });
+        const refreshToken = yield TokenService_1.TokenService.gerarRefreshToken(usuario.id);
+        res.json({ token, refreshToken: refreshToken.token, user: UsuarioService_1.UsuarioService.sanitizeUser(usuario) });
     }
     catch (err) {
         if (err instanceof zod_1.z.ZodError) {

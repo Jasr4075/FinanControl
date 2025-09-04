@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { WebhookService } from '../services/WebhookService';
-import { EventoWebhook } from '../models/EventoWebhook';
+import { EventoWebhook } from '../models/EventoWebHook';
 
 export class WebhookController {
   static async registrar(req: Request, res: Response, next: NextFunction) {
