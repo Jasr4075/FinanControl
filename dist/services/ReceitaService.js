@@ -130,5 +130,19 @@ class ReceitaService {
             });
         });
     }
+    static deleteByPaymentId(paymentId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const receita = yield Receita_1.Receita.findOne({ where: { nota: { [sequelize_1.Op.iLike]: `%${paymentId}%` } } });
+            if (!receita)
+                return null;
+            const conta = yield Conta_1.Conta.findByPk(receita.accountId);
+            if (conta) {
+                conta.saldo = Number(conta.saldo) - Number(receita.quantidade);
+                yield conta.save();
+            }
+            yield receita.destroy();
+            return true;
+        });
+    }
 }
 exports.ReceitaService = ReceitaService;

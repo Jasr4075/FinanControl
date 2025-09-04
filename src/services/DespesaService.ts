@@ -16,6 +16,36 @@ const includeRelations = [
 ]
 
 export class DespesaService {
+// adiciona no final da classe DespesaService
+static async deleteByPaymentId(paymentId: string) {
+  const despesa = await Despesa.findOne({ where: { observacoes: { [Op.iLike]: `%${paymentId}%` } } })
+  if (!despesa) return null
+
+  // Reverter saldo se necessário
+  if (['PIX', 'DEBITO', 'DINHEIRO'].includes(despesa.metodoPagamento) && despesa.contaId) {
+    const conta = await Conta.findByPk(despesa.contaId)
+    if (conta) {
+      conta.saldo = Number(conta.saldo) + Number(despesa.valor)
+      await conta.save()
+    }
+  }
+
+  // Reverter crédito usado
+  if (despesa.metodoPagamento === 'CREDITO' && despesa.cartaoId) {
+    const cartao = await Cartao.findByPk(despesa.cartaoId)
+    if (cartao) {
+      const totalComJuros = despesa.juros && Number(despesa.juros) > 0
+        ? +(Number(despesa.valor) * (1 + Number(despesa.juros)/100)).toFixed(2)
+        : Number(despesa.valor)
+      cartao.creditUsed = Math.max(0, Number(cartao.creditUsed || 0) - totalComJuros) as any
+      await cartao.save()
+    }
+  }
+
+  await despesa.destroy()
+  return true
+}
+
   // static async create(data: any) {
   //   const {
   //     userId, contaId, cartaoId, categoryId,
@@ -251,5 +281,7 @@ export class DespesaService {
       include: includeRelations,
     })
   }
+
+  
 
 }

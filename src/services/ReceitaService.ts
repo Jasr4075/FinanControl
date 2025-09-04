@@ -124,4 +124,16 @@ export class ReceitaService {
       include: includeRelations,
     })
   }
+
+  static async deleteByPaymentId(paymentId: string) {
+    const receita = await Receita.findOne({ where: { nota: { [Op.iLike]: `%${paymentId}%` } } })
+    if (!receita) return null
+    const conta = await Conta.findByPk(receita.accountId)
+    if (conta) {
+      conta.saldo = Number(conta.saldo) - Number(receita.quantidade)
+      await conta.save()
+    }
+    await receita.destroy()
+    return true
+  }
 }
