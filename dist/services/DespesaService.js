@@ -15,6 +15,7 @@ const Usuario_1 = require("../models/Usuario");
 const Conta_1 = require("../models/Conta");
 const Cartao_1 = require("../models/Cartao");
 const Category_1 = require("../models/Category");
+const Parcela_1 = require("../models/Parcela");
 const sequelize_1 = require("sequelize");
 const ParcelaService_1 = require("./ParcelaService");
 const date_fns_1 = require("date-fns");
@@ -240,13 +241,19 @@ class DespesaService {
                 }
             }
             // Reverter crédito usado (simplificado: usar valor + juros se armazenado)
-            if (despesa.metodoPagamento === 'CREDITO' && despesa.cartaoId) {
+            if (despesa.metodoPagamento === 'CREDITO') {
+                // 🔹 Recupera todas as parcelas associadas
+                const parcelas = yield Parcela_1.Parcela.findAll({ where: { despesaId: despesa.id } });
+                for (const parcela of parcelas) {
+                    // usa ParcelaService.delete, que já atualiza a fatura
+                    yield ParcelaService_1.ParcelaService.delete(parcela.id);
+                }
+                // 🔹 Atualiza o creditUsed do cartão (com base no total da despesa, incluindo juros se houver)
                 const cartao = yield Cartao_1.Cartao.findByPk(despesa.cartaoId);
                 if (cartao) {
-                    const valorBase = Number(despesa.valor);
-                    // juros armazenado no campo juros percentual
-                    const totalComJuros = despesa.juros && Number(despesa.juros) > 0 ? +(valorBase * (1 + Number(despesa.juros) / 100)).toFixed(2) : valorBase;
-                    cartao.creditUsed = Math.max(0, Number(cartao.creditUsed || 0) - totalComJuros);
+                    const total = Number(despesa.valor) + (despesa.juros ? Number(despesa.juros) : 0);
+                    const novoUsed = Number(cartao.creditUsed) - total;
+                    cartao.creditUsed = (novoUsed < 0 ? 0 : novoUsed);
                     yield cartao.save();
                 }
             }

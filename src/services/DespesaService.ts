@@ -3,10 +3,11 @@ import { Usuario } from '../models/Usuario'
 import { Conta } from '../models/Conta'
 import { Cartao } from '../models/Cartao'
 import { Category } from '../models/Category'
+import { Parcela } from '../models/Parcela'
 import { Op } from 'sequelize';
 import { ParcelaService } from './ParcelaService'
+import { FaturaService } from './FaturaService'
 import { addMonths } from 'date-fns'
-import { sequelize } from '../config/config'
 
 const includeRelations = [
   { model: Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
@@ -16,35 +17,35 @@ const includeRelations = [
 ]
 
 export class DespesaService {
-// adiciona no final da classe DespesaService
-static async deleteByPaymentId(paymentId: string) {
-  const despesa = await Despesa.findOne({ where: { observacoes: { [Op.iLike]: `%${paymentId}%` } } })
-  if (!despesa) return null
+  // adiciona no final da classe DespesaService
+  static async deleteByPaymentId(paymentId: string) {
+    const despesa = await Despesa.findOne({ where: { observacoes: { [Op.iLike]: `%${paymentId}%` } } })
+    if (!despesa) return null
 
-  // Reverter saldo se necessário
-  if (['PIX', 'DEBITO', 'DINHEIRO'].includes(despesa.metodoPagamento) && despesa.contaId) {
-    const conta = await Conta.findByPk(despesa.contaId)
-    if (conta) {
-      conta.saldo = Number(conta.saldo) + Number(despesa.valor)
-      await conta.save()
+    // Reverter saldo se necessário
+    if (['PIX', 'DEBITO', 'DINHEIRO'].includes(despesa.metodoPagamento) && despesa.contaId) {
+      const conta = await Conta.findByPk(despesa.contaId)
+      if (conta) {
+        conta.saldo = Number(conta.saldo) + Number(despesa.valor)
+        await conta.save()
+      }
     }
-  }
 
-  // Reverter crédito usado
-  if (despesa.metodoPagamento === 'CREDITO' && despesa.cartaoId) {
-    const cartao = await Cartao.findByPk(despesa.cartaoId)
-    if (cartao) {
-      const totalComJuros = despesa.juros && Number(despesa.juros) > 0
-        ? +(Number(despesa.valor) * (1 + Number(despesa.juros)/100)).toFixed(2)
-        : Number(despesa.valor)
-      cartao.creditUsed = Math.max(0, Number(cartao.creditUsed || 0) - totalComJuros) as any
-      await cartao.save()
+    // Reverter crédito usado
+    if (despesa.metodoPagamento === 'CREDITO' && despesa.cartaoId) {
+      const cartao = await Cartao.findByPk(despesa.cartaoId)
+      if (cartao) {
+        const totalComJuros = despesa.juros && Number(despesa.juros) > 0
+          ? +(Number(despesa.valor) * (1 + Number(despesa.juros) / 100)).toFixed(2)
+          : Number(despesa.valor)
+        cartao.creditUsed = Math.max(0, Number(cartao.creditUsed || 0) - totalComJuros) as any
+        await cartao.save()
+      }
     }
-  }
 
-  await despesa.destroy()
-  return true
-}
+    await despesa.destroy()
+    return true
+  }
 
   // static async create(data: any) {
   //   const {
@@ -163,7 +164,7 @@ static async deleteByPaymentId(paymentId: string) {
 
     return await Despesa.findByPk(novaDespesa.id, { include: includeRelations })
   }
-  
+
   static async getAll() {
     return await Despesa.findAll({ include: includeRelations })
   }
@@ -210,8 +211,8 @@ static async deleteByPaymentId(paymentId: string) {
         const conta = await Conta.findByPk(original.contaId)
         if (conta) {
           // devolver valor antigo
-            conta.saldo = Number(conta.saldo) + Number(original.valor)
-            await conta.save()
+          conta.saldo = Number(conta.saldo) + Number(original.valor)
+          await conta.save()
         }
       }
       if (['PIX', 'DEBITO', 'DINHEIRO'].includes(data.metodoPagamento || despesa.metodoPagamento) && (data.contaId || despesa.contaId)) {
@@ -239,16 +240,25 @@ static async deleteByPaymentId(paymentId: string) {
       }
     }
     // Reverter crédito usado (simplificado: usar valor + juros se armazenado)
-    if (despesa.metodoPagamento === 'CREDITO' && despesa.cartaoId) {
+    if (despesa.metodoPagamento === 'CREDITO') {
+      // 🔹 Recupera todas as parcelas associadas
+      const parcelas = await Parcela.findAll({ where: { despesaId: despesa.id } })
+
+      for (const parcela of parcelas) {
+        // usa ParcelaService.delete, que já atualiza a fatura
+        await ParcelaService.delete(parcela.id)
+      }
+
+      // 🔹 Atualiza o creditUsed do cartão (com base no total da despesa, incluindo juros se houver)
       const cartao = await Cartao.findByPk(despesa.cartaoId)
       if (cartao) {
-        const valorBase = Number(despesa.valor)
-        // juros armazenado no campo juros percentual
-        const totalComJuros = despesa.juros && Number(despesa.juros) > 0 ? +(valorBase * (1 + Number(despesa.juros)/100)).toFixed(2) : valorBase
-        cartao.creditUsed = Math.max(0, Number(cartao.creditUsed || 0) - totalComJuros) as any
+        const total = Number(despesa.valor) + (despesa.juros ? Number(despesa.juros) : 0)
+        const novoUsed = Number(cartao.creditUsed) - total
+        cartao.creditUsed = (novoUsed < 0 ? 0 : novoUsed) as any
         await cartao.save()
       }
     }
+
     await despesa.destroy();
     return true;
   }
@@ -282,6 +292,6 @@ static async deleteByPaymentId(paymentId: string) {
     })
   }
 
-  
+
 
 }
