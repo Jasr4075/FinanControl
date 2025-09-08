@@ -292,5 +292,19 @@ class DespesaService {
             });
         });
     }
+    static getMesAtual(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+            const hoje = new Date();
+            return yield Despesa_1.Despesa.findAll({
+                where: {
+                    userId,
+                    data: { [sequelize_1.Op.between]: [inicioMes, hoje] }
+                },
+                include: includeRelations,
+                order: [['data', 'DESC']],
+            });
+        });
+    }
 }
 exports.DespesaService = DespesaService;

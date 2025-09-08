@@ -292,6 +292,16 @@ export class DespesaService {
     })
   }
 
-
-
+  static async getMesAtual(userId: string) {
+    const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const hoje = new Date();
+    return await Despesa.findAll({
+      where: {
+        userId,
+        data: { [Op.between]: [inicioMes, hoje] }
+      },
+      include: includeRelations,
+      order: [['data', 'DESC']],
+    });
+  }  
 }

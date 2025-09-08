@@ -144,5 +144,19 @@ class ReceitaService {
             return true;
         });
     }
+    static getMesAtual(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+            const hoje = new Date();
+            return yield Receita_1.Receita.findAll({
+                where: {
+                    userId,
+                    data: { [sequelize_1.Op.between]: [inicioMes, hoje] }
+                },
+                include: includeRelations,
+                order: [['data', 'DESC']],
+            });
+        });
+    }
 }
 exports.ReceitaService = ReceitaService;

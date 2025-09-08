@@ -6,7 +6,8 @@ import {
   updateReceita,
   deleteReceita,
   getTotalReceitasMes,
-  getUltimasReceitas
+  getUltimasReceitas,
+  getReceitasMesAtual
 } from '../controllers/ReceitaController'
 
 const router = Router()
@@ -18,5 +19,7 @@ router.put('/:id', updateReceita)
 router.delete('/:id', deleteReceita)
 router.get('/total-mes/:userId', getTotalReceitasMes)
 router.get('/ultimas/:userId', getUltimasReceitas)
+router.get('/mes-atual/:userId', getReceitasMesAtual);
+
 
 export default router

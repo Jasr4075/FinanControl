@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUltimasReceitas = exports.getTotalReceitasMes = exports.deleteReceita = exports.updateReceita = exports.getReceitaById = exports.getReceitas = exports.createReceita = void 0;
+exports.getReceitasMesAtual = exports.getUltimasReceitas = exports.getTotalReceitasMes = exports.deleteReceita = exports.updateReceita = exports.getReceitaById = exports.getReceitas = exports.createReceita = void 0;
 const ReceitaService_1 = require("../services/ReceitaService");
 const receita_schema_1 = require("../validators/receita.schema");
 const zod_1 = __importDefault(require("zod"));
@@ -134,3 +134,13 @@ const getUltimasReceitas = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getUltimasReceitas = getUltimasReceitas;
+const getReceitasMesAtual = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const receitas = yield ReceitaService_1.ReceitaService.getMesAtual(req.params.userId);
+        res.status(200).json({ success: true, data: receitas });
+    }
+    catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+exports.getReceitasMesAtual = getReceitasMesAtual;

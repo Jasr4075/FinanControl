@@ -6,7 +6,8 @@ import {
     updateDespesa,
     deleteDespesa,
     getTotalDespesasMes,
-    getUltimasDespesas
+    getUltimasDespesas,
+    getDespesasMesAtual
 } from '../controllers/DespesaController'
 
 const router = Router()
@@ -18,6 +19,8 @@ router.put('/:id', updateDespesa)
 router.delete('/:id', deleteDespesa)
 router.get('/total-mes/:userId', getTotalDespesasMes)
 router.get('/ultimas/:userId', getUltimasDespesas)
+router.get('/mes-atual/:userId', getDespesasMesAtual);
+
 
 
 export default router

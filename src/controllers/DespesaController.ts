@@ -94,3 +94,12 @@ export const getUltimasDespesas = async (req: Request, res: Response, next: Next
     next(error)
   }
 }
+
+export const getDespesasMesAtual = async (req: Request, res: Response) => {
+  try {
+    const despesas = await DespesaService.getMesAtual(req.params.userId);
+    res.status(200).json({ success: true, data: despesas });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}

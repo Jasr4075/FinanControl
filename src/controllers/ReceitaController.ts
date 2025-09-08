@@ -117,3 +117,12 @@ export const getUltimasReceitas = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: error.message })
   }
 }
+
+export const getReceitasMesAtual = async (req: Request, res: Response) => {
+  try {
+    const receitas = await ReceitaService.getMesAtual(req.params.userId);
+    res.status(200).json({ success: true, data: receitas });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
