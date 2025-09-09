@@ -9,19 +9,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sequelize = exports.initDatabase = void 0;
-const config_1 = require("../config/config");
-Object.defineProperty(exports, "sequelize", { enumerable: true, get: function () { return config_1.sequelize; } });
-require("../models");
-const initDatabase = () => __awaiter(void 0, void 0, void 0, function* () {
+exports.redisClient = void 0;
+const redis_1 = require("redis");
+const REDIS_URL = process.env.REDIS_URL;
+exports.redisClient = (0, redis_1.createClient)({ url: REDIS_URL });
+exports.redisClient.on("error", (err) => console.error("Redis ❌", err));
+(() => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield config_1.sequelize.authenticate();
-        console.log('Postgres ✅');
-        yield config_1.sequelize.sync({ alter: true });
-        console.log('Tabelas  ✅');
+        yield exports.redisClient.connect();
+        console.log("Redis    ✅");
     }
-    catch (error) {
-        console.error('Tabelas ❌', error);
+    catch (err) {
+        console.error("Erro ao conectar no Redis", err);
     }
-});
-exports.initDatabase = initDatabase;
+}))();

@@ -11,6 +11,7 @@ const cors_1 = __importDefault(require("cors"));
 const database_1 = require("./database");
 const routes_1 = __importDefault(require("./routes"));
 const errorHandler_1 = require("./middlewares/errorHandler");
+require("./redisClient");
 const app = (0, express_1.default)();
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)());

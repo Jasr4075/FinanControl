@@ -11,10 +11,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteCategory = exports.updateCategory = exports.getCategoryById = exports.getCategories = exports.createCategoriesBulk = void 0;
 const CategoryService_1 = require("../services/CategoryService");
+const redisClient_1 = require("../redisClient");
 const createCategoriesBulk = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const categories = req.body;
         const inserted = yield CategoryService_1.CategoryService.createBulk(categories);
+        yield redisClient_1.redisClient.del('categories_all');
         res.status(201).json({ success: true, data: inserted });
     }
     catch (error) {
@@ -24,7 +26,15 @@ const createCategoriesBulk = (req, res) => __awaiter(void 0, void 0, void 0, fun
 exports.createCategoriesBulk = createCategoriesBulk;
 const getCategories = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const cacheKey = 'categories_all';
+        const cached = yield redisClient_1.redisClient.get(cacheKey);
+        if (cached) {
+            console.log('⚡ Cache HIT - getCategories');
+            return res.status(200).json({ success: true, data: JSON.parse(cached) });
+        }
         const categories = yield CategoryService_1.CategoryService.findAll();
+        yield redisClient_1.redisClient.set(cacheKey, JSON.stringify(categories), { EX: 60 });
+        console.log('💾 Cache SET - getCategories');
         res.status(200).json({ success: true, data: categories });
     }
     catch (error) {
@@ -34,9 +44,18 @@ const getCategories = (_req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.getCategories = getCategories;
 const getCategoryById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const category = yield CategoryService_1.CategoryService.findById(req.params.id);
+        const id = req.params.id;
+        const cacheKey = `category_${id}`;
+        const cached = yield redisClient_1.redisClient.get(cacheKey);
+        if (cached) {
+            console.log(`⚡ Cache HIT - getCategoryById(${id})`);
+            return res.status(200).json({ success: true, data: JSON.parse(cached) });
+        }
+        const category = yield CategoryService_1.CategoryService.findById(id);
         if (!category)
             return res.status(404).json({ success: false, message: 'Categoria não encontrada.' });
+        yield redisClient_1.redisClient.set(cacheKey, JSON.stringify(category), { EX: 60 });
+        console.log(`💾 Cache SET - getCategoryById(${id})`);
         res.status(200).json({ success: true, data: category });
     }
     catch (error) {
@@ -46,7 +65,10 @@ const getCategoryById = (req, res) => __awaiter(void 0, void 0, void 0, function
 exports.getCategoryById = getCategoryById;
 const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const category = yield CategoryService_1.CategoryService.update(req.params.id, req.body.name);
+        const id = req.params.id;
+        const category = yield CategoryService_1.CategoryService.update(id, req.body.name);
+        yield redisClient_1.redisClient.del('categories_all');
+        yield redisClient_1.redisClient.del(`category_${id}`);
         res.status(200).json({ success: true, data: category });
     }
     catch (error) {
@@ -59,7 +81,10 @@ const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.updateCategory = updateCategory;
 const deleteCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield CategoryService_1.CategoryService.delete(req.params.id);
+        const id = req.params.id;
+        yield CategoryService_1.CategoryService.delete(id);
+        yield redisClient_1.redisClient.del('categories_all');
+        yield redisClient_1.redisClient.del(`category_${id}`);
         res.status(200).json({ success: true, message: 'Categoria excluída com sucesso.' });
     }
     catch (error) {
