@@ -6,7 +6,7 @@ import cors from 'cors'
 import { initDatabase } from './database'
 import router from './routes'
 import { errorHandler } from './middlewares/errorHandler'
-
+import "./redisClient";
 
 const app = express()
 

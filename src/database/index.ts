@@ -4,13 +4,13 @@ import '../models'
 export const initDatabase = async (): Promise<void> => {
   try {
     await sequelize.authenticate()
-    console.log('🔌 Conexão com o banco estabelecida com sucesso.')
+    console.log('Postgres ✅')
 
     await sequelize.sync({ alter: true })
-    console.log('📦 Sincronização com o banco finalizada.')
+    console.log('Tabelas  ✅')
 
   } catch (error) {
-    console.error('❌ Erro ao conectar ou acessar tabela:', error)
+    console.error('Tabelas ❌', error)
   }
 }
 
