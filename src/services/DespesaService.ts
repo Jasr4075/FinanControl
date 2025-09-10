@@ -6,8 +6,11 @@ import { Category } from '../models/Category'
 import { Parcela } from '../models/Parcela'
 import { Op } from 'sequelize';
 import { ParcelaService } from './ParcelaService'
-import { FaturaService } from './FaturaService'
 import { addMonths } from 'date-fns'
+import { redisClient } from '../redisClient'
+
+const CACHE_TTL_SHORT = 900;  // 15 minutos
+const CACHE_TTL_LONG = 3600;  // 1 hora
 
 const includeRelations = [
   { model: Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },

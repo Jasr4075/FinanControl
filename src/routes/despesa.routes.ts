@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import {
     createDespesa,
-    getDespesas,
+    // getDespesas,
     getDespesaById,
     updateDespesa,
     deleteDespesa,
@@ -13,7 +13,7 @@ import {
 const router = Router()
 
 router.post('/', createDespesa)
-router.get('/', getDespesas)
+// router.get('/', getDespesas)
 router.get('/:id', getDespesaById)
 router.put('/:id', updateDespesa)
 router.delete('/:id', deleteDespesa)
