@@ -4,6 +4,8 @@ import { TokenService } from '../services/TokenService';
 import bcrypt from 'bcrypt';
 import { usuarioCreateSchema } from '../validators/usuario.schema';
 import { z } from 'zod';
+import { getUserCached } from "../helpers/redisCache";
+
 
 // --- Cadastro ---
 export const registerUsuario = async (req: Request, res: Response, next: NextFunction) => {
@@ -31,7 +33,6 @@ export const registerUsuario = async (req: Request, res: Response, next: NextFun
 // --- Login ---
 export const loginUsuario = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Validação simples para login
     const loginSchema = z.object({
       username: z.string().min(1, "Username é obrigatório"),
       senha: z.string().min(1, "Senha é obrigatória"),
@@ -39,16 +40,19 @@ export const loginUsuario = async (req: Request, res: Response, next: NextFuncti
 
     const { username, senha } = loginSchema.parse(req.body);
 
-    const usuario = await UsuarioService.findByUsernameRaw(username);
+    // 🔥 Busca o usuário no Redis antes de ir ao Postgres
+    const usuario = await getUserCached(username);
     if (!usuario) {
-      return res.status(401).json({ erro: 'Usuário ou senha inválidos.' });
+      return res.status(401).json({ erro: "Usuário ou senha inválidos." });
     }
 
+    // Valida senha
     const senhaValida = await bcrypt.compare(senha, usuario.hash);
     if (!senhaValida) {
-      return res.status(401).json({ erro: 'Usuário ou senha inválidos.' });
+      return res.status(401).json({ erro: "Usuário ou senha inválidos." });
     }
 
+    // Gera tokens
     const token = TokenService.gerarToken({
       id: usuario.id,
       username: usuario.username,
@@ -56,7 +60,11 @@ export const loginUsuario = async (req: Request, res: Response, next: NextFuncti
     });
     const refreshToken = await TokenService.gerarRefreshToken(usuario.id);
 
-    res.json({ token, refreshToken: refreshToken.token, user: UsuarioService.sanitizeUser(usuario) });
+    res.json({
+      token,
+      refreshToken: refreshToken.token,
+      user: UsuarioService.sanitizeUser(usuario),
+    });
   } catch (err) {
     if (err instanceof z.ZodError) {
       return res.status(400).json({ erros: err.errors });
