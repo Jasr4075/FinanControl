@@ -22,8 +22,8 @@ export class Cartao extends Model<
     declare creditLimit: number
     declare hasCashback: boolean
     declare cashbackPercent: number
-    declare closingDay: number
-    declare dueDay: number
+    declare closingDay: number | null
+    declare dueDay: number | null
     declare active: boolean
     declare creditUsed: number
 }
@@ -86,11 +86,11 @@ Cartao.init(
         },
         closingDay: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
         },
         dueDay: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
         },
         active: {
             type: DataTypes.BOOLEAN,

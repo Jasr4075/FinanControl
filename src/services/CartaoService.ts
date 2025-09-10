@@ -4,7 +4,7 @@ import { Conta } from '../models/Conta'
 
 const includeRelations = [
   { model: Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
-  { model: Conta, as: 'conta', attributes: ['id', 'bancoNome', 'agencia', 'conta'] },
+  { model: Conta, as: 'conta', attributes: ['id', 'bancoNome', 'agencia', 'conta', 'saldo'] },
 ]
 
 export class CartaoService {
@@ -16,8 +16,8 @@ export class CartaoService {
     creditLimit?: number
     hasCashback?: boolean
     cashbackPercent?: number
-    closingDay: number
-    dueDay: number
+    closingDay?: number
+    dueDay?: number
     active?: boolean
   }) {
     const {
@@ -33,33 +33,48 @@ export class CartaoService {
       active = true,
     } = data
 
-  if (!userId || !contaId || !nome || !type || closingDay === undefined || dueDay === undefined) {
+    // Valida campos obrigatórios gerais
+    if (!userId || !contaId || !nome || !type) {
       throw new Error('Campos obrigatórios não preenchidos.')
     }
 
-  // Validações adicionais
-  if (creditLimit < 0) throw new Error('Limite de crédito não pode ser negativo.')
-  if (cashbackPercent < 0 || cashbackPercent > 100) throw new Error('Cashback deve estar entre 0 e 100%.')
-  if (closingDay < 1 || closingDay > 28) throw new Error('Dia de fechamento deve estar entre 1 e 28.')
-  if (dueDay < 1 || dueDay > 28) throw new Error('Dia de vencimento deve estar entre 1 e 28.')
-  if (dueDay === closingDay) throw new Error('Dia de vencimento não pode ser igual ao dia de fechamento.')
+    // Valida obrigatoriedade de closingDay/dueDay apenas para CREDITO ou MISTO
+    if ((type === 'CREDITO' || type === 'MISTO') && (closingDay === undefined || dueDay === undefined)) {
+      throw new Error('closingDay e dueDay são obrigatórios para cartões de crédito ou misto.')
+    }
 
-  const user = await Usuario.findByPk(userId)
-  if (!user) throw new Error('Usuário não encontrado.')
-  const conta = await Conta.findByPk(contaId)
-  if (!conta) throw new Error('Conta não encontrada.')
+    // Validações adicionais
+    if (creditLimit < 0) throw new Error('Limite de crédito não pode ser negativo.')
+    if (cashbackPercent < 0 || cashbackPercent > 100) throw new Error('Cashback deve estar entre 0 e 100%.')
 
-  const novoCartao = await Cartao.create({
+    if (closingDay !== undefined && (closingDay < 1 || closingDay > 28))
+      throw new Error('Dia de fechamento deve estar entre 1 e 28.')
+
+    if (dueDay !== undefined && (dueDay < 1 || dueDay > 28))
+      throw new Error('Dia de vencimento deve estar entre 1 e 28.')
+
+    if (closingDay !== undefined && dueDay !== undefined && closingDay === dueDay)
+      throw new Error('Dia de vencimento não pode ser igual ao dia de fechamento.')
+
+    // Verifica existência de usuário e conta
+    const user = await Usuario.findByPk(userId)
+    if (!user) throw new Error('Usuário não encontrado.')
+
+    const conta = await Conta.findByPk(contaId)
+    if (!conta) throw new Error('Conta não encontrada.')
+
+    // Cria o cartão
+    const novoCartao = await Cartao.create({
       userId,
       contaId,
       nome,
       type,
       creditLimit,
-  creditUsed: 0,
+      creditUsed: 0,
       hasCashback,
       cashbackPercent,
-      closingDay,
-      dueDay,
+      closingDay: closingDay ?? null, // garante null para débito
+      dueDay: dueDay ?? null,         // garante null para débito
       active,
     })
 
@@ -78,24 +93,34 @@ export class CartaoService {
     return await Cartao.findByPk(id, { include: includeRelations })
   }
 
-  static async resumo(id: string) {
-    const cartao = await Cartao.findByPk(id, { include: includeRelations })
-    if (!cartao) throw new Error('Cartão não encontrado.')
-    const creditLimitNum = Number(cartao.creditLimit)
-    const creditUsedNum = Number(cartao.creditUsed)
-    const available = Math.max(0, creditLimitNum - creditUsedNum)
-    const percentUsed = creditLimitNum > 0 ? +(creditUsedNum / creditLimitNum * 100).toFixed(2) : 0
-    return {
-      id: cartao.id,
-      nome: cartao.nome,
-      type: cartao.type,
-      creditLimit: creditLimitNum,
-      creditUsed: creditUsedNum,
-      available,
-      percentUsed,
-      conta: (cartao as any).conta,
-    }
+static async resumo(id: string) {
+  const cartao = await Cartao.findByPk(id, { include: includeRelations })
+  if (!cartao) throw new Error('Cartão não encontrado.')
+
+  const creditLimitNum = Number(cartao.creditLimit)
+  const creditUsedNum = Number(cartao.creditUsed)
+  const available = Math.max(0, creditLimitNum - creditUsedNum)
+  const percentUsed = creditLimitNum > 0 ? +(creditUsedNum / creditLimitNum * 100).toFixed(2) : 0
+
+  const contaInstance = (cartao as any).conta
+  const conta = contaInstance ? contaInstance.get({ plain: true }) : null
+
+  return {
+    id: cartao.id,
+    nome: cartao.nome,
+    type: cartao.type,
+    creditLimit: creditLimitNum,
+    creditUsed: creditUsedNum,
+    available,
+    percentUsed,
+    conta: {
+      ...conta,
+      saldo: conta?.saldo ? Number(conta.saldo) : 0,
+    },
   }
+}
+
+
 
   static async update(id: string, data: Partial<{
     nome: string
@@ -125,9 +150,9 @@ export class CartaoService {
   static async delete(id: string) {
     const cartao = await Cartao.findByPk(id);
     if (!cartao) throw new Error('Cartão não encontrado.');
-  
+
     await cartao.destroy(); // deleta o registro do banco
-  
+
     return true;
   }
 }

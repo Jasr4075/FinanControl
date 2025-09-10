@@ -15,9 +15,7 @@ export const cartaoCreateSchema = z.object({
     invalid_type_error: 'Tipo de cartão inválido',
   }),
 
-  hasCashback: z.boolean()
-    .optional()
-    .default(false),
+  hasCashback: z.boolean().optional().default(false),
 
   cashbackPercent: z.number()
     .min(0, 'Percentual de cashback não pode ser negativo')
@@ -29,23 +27,22 @@ export const cartaoCreateSchema = z.object({
     .optional()
     .default(0),
 
-  closingDay: z.coerce.number({
-    required_error: 'Dia de fechamento é obrigatório',
-    invalid_type_error: 'Dia de fechamento inválido',
-  })
-  .min(1, { message: 'Dia de fechamento inválido' })
-  .max(28, { message: 'Dia de fechamento deve ser até 28' }),
+  closingDay: z.coerce.number().min(1).max(28).optional(),
+  dueDay: z.coerce.number().min(1).max(28).optional(),
 
-  dueDay: z.coerce.number({
-    required_error: 'Dia de vencimento é obrigatório',
-    invalid_type_error: 'Dia de vencimento inválido',
-  })
-  .min(1, { message: 'Dia de vencimento inválido' })
-  .max(28, { message: 'Dia de vencimento deve ser até 28' }),
-
-  active: z.boolean()
-    .optional()
-    .default(true),
-})
+  active: z.boolean().optional().default(true),
+}).refine(
+  (data) => {
+    if (data.type === 'CREDITO' || data.type === 'MISTO') {
+      return data.closingDay !== undefined && data.dueDay !== undefined
+    }
+    return true
+  },
+  {
+    message: 'closingDay e dueDay são obrigatórios para cartões de crédito ou misto',
+    path: ['closingDay'], // aparece o erro nesses campos
+  }
+)
 
 export type CartaoCreateDTO = z.infer<typeof cartaoCreateSchema>
+ 

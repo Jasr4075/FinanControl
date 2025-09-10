@@ -63,11 +63,11 @@ Cartao.init({
     },
     closingDay: {
         type: sequelize_1.DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
     },
     dueDay: {
         type: sequelize_1.DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
     },
     active: {
         type: sequelize_1.DataTypes.BOOLEAN,
