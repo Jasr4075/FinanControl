@@ -14,8 +14,8 @@ const DespesaService_1 = require("../services/DespesaService");
 const despesa_schema_1 = require("../validators/despesa.schema");
 const zod_1 = require("zod");
 const redisClient_1 = require("../redisClient");
-const CACHE_TTL_SHORT = 900; // 15 minutos
-const CACHE_TTL_LONG = 3600; // 1 hora
+const CACHE_TTL_SHORT = 5;
+const CACHE_TTL_LONG = 15;
 const getDespesaById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const cacheKey = `despesa:${req.params.id}`;
@@ -131,10 +131,14 @@ exports.updateDespesa = updateDespesa;
 const deleteDespesa = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const despesa = yield DespesaService_1.DespesaService.delete(req.params.id);
+        if (!despesa) {
+            return res.status(404).json({ success: false, message: 'Despesa não encontrada.' });
+        }
+        const userId = despesa.userId; // pegar do registro deletado
         // invalidar caches relacionados ao usuário
-        yield redisClient_1.redisClient.del(`ultimasDespesas:${req.body.userId}`);
-        yield redisClient_1.redisClient.del(`despesasMesAtual:${req.body.userId}`);
-        yield redisClient_1.redisClient.del(`totalDespesas:${req.body.userId}:mesAtual`);
+        yield redisClient_1.redisClient.del(`ultimasDespesas:${userId}`);
+        yield redisClient_1.redisClient.del(`despesasMesAtual:${userId}`);
+        yield redisClient_1.redisClient.del(`totalDespesas:${userId}:mesAtual`);
         yield redisClient_1.redisClient.del(`despesa:${req.params.id}`);
         res.status(200).json({ success: true, message: 'Despesa excluída com sucesso.' });
     }

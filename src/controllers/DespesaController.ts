@@ -4,8 +4,8 @@ import { despesaCreateSchema, despesaUpdateSchema } from '../validators/despesa.
 import { z } from 'zod';
 import { redisClient } from '../redisClient';
 
-const CACHE_TTL_SHORT = 900;  // 15 minutos
-const CACHE_TTL_LONG = 3600;  // 1 hora
+const CACHE_TTL_SHORT = 5;
+const CACHE_TTL_LONG = 15;
 
 
 export const getDespesaById = async (req: Request, res: Response, next: NextFunction) => {
@@ -121,11 +121,17 @@ export const updateDespesa = async (req: Request, res: Response, next: NextFunct
 export const deleteDespesa = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const despesa = await DespesaService.delete(req.params.id);
+    
+    if (!despesa) {
+      return res.status(404).json({ success: false, message: 'Despesa não encontrada.' });
+    }
+
+    const userId = despesa.userId; // pegar do registro deletado
 
     // invalidar caches relacionados ao usuário
-    await redisClient.del(`ultimasDespesas:${req.body.userId}`);
-    await redisClient.del(`despesasMesAtual:${req.body.userId}`);
-    await redisClient.del(`totalDespesas:${req.body.userId}:mesAtual`);
+    await redisClient.del(`ultimasDespesas:${userId}`);
+    await redisClient.del(`despesasMesAtual:${userId}`);
+    await redisClient.del(`totalDespesas:${userId}:mesAtual`);
     await redisClient.del(`despesa:${req.params.id}`);
 
     res.status(200).json({ success: true, message: 'Despesa excluída com sucesso.' });
@@ -133,3 +139,4 @@ export const deleteDespesa = async (req: Request, res: Response, next: NextFunct
     next(error);
   }
 };
+

@@ -231,7 +231,7 @@ export class DespesaService {
     return await Despesa.findByPk(id, { include: includeRelations })
   }
 
-  static async delete(id: string): Promise<boolean> {
+  static async delete(id: string): Promise<Despesa> {
     const despesa = await Despesa.findByPk(id);
     if (!despesa) throw new Error('Despesa não encontrada.');
     // Reverter saldo se necessário
@@ -263,7 +263,7 @@ export class DespesaService {
     }
 
     await despesa.destroy();
-    return true;
+    return despesa;
   }
 
   static async getTotalMes(userId: string) {

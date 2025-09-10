@@ -260,7 +260,7 @@ class DespesaService {
                 }
             }
             yield despesa.destroy();
-            return true;
+            return despesa;
         });
     }
     static getTotalMes(userId) {
