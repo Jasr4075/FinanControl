@@ -10,3 +10,6 @@ Cartao_1.Cartao.belongsTo(Conta_1.Conta, { foreignKey: 'contaId', as: 'conta' })
 // Conta <> Usuario
 Usuario_1.Usuario.hasMany(Conta_1.Conta, { foreignKey: 'userId', as: 'contas' });
 Conta_1.Conta.belongsTo(Usuario_1.Usuario, { foreignKey: 'userId', as: 'usuario' });
+// Cartao <> Usuario
+Cartao_1.Cartao.belongsTo(Usuario_1.Usuario, { foreignKey: 'userId', as: 'usuario' });
+Usuario_1.Usuario.hasMany(Cartao_1.Cartao, { foreignKey: 'userId', as: 'cartoes' });
