@@ -3,8 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Cartao = void 0;
 const sequelize_1 = require("sequelize");
 const config_1 = require("../config/config");
-const Usuario_1 = require("./Usuario");
-const Conta_1 = require("./Conta");
 class Cartao extends sequelize_1.Model {
 }
 exports.Cartao = Cartao;
@@ -89,20 +87,4 @@ Cartao.init({
         // Opcional: evitar nomes duplicados por usuário
         { unique: false, fields: ['user_id', 'nome'] },
     ],
-});
-Usuario_1.Usuario.hasMany(Cartao, {
-    foreignKey: 'userId',
-    as: 'cartoes',
-});
-Cartao.belongsTo(Usuario_1.Usuario, {
-    foreignKey: 'userId',
-    as: 'usuario',
-});
-Conta_1.Conta.hasMany(Cartao, {
-    foreignKey: 'contaId',
-    as: 'cartoes',
-});
-Cartao.belongsTo(Conta_1.Conta, {
-    foreignKey: 'contaId',
-    as: 'conta',
 });

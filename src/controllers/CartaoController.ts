@@ -102,17 +102,21 @@ export const updateCartao = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-// --- Deletar cartão ---
+// --- DELETE CARTÃO ---
 export const deleteCartao = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const deleted = await CartaoService.delete(req.params.id);
-    if (!deleted) return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
+    const cartao = await CartaoService.findById(req.params.id);
+    if (!cartao) return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
 
-    // Limpa cache
+    const userId = cartao.userId;
+
+    // Deleta o cartão
+    await CartaoService.delete(req.params.id);
+
+    // Invalida caches relacionados
     await redisClient.del(`cartao:${req.params.id}`);
     await redisClient.del(`cartaoResumo:${req.params.id}`);
-    // opcional: limpar cache geral do usuário se tiver
-    // await redisClient.del(`cartoes:${userId}`)
+    if (userId) await redisClient.del(`cartoes:${userId}`);
 
     res.status(200).json({ success: true, message: 'Cartão excluído com sucesso.' });
   } catch (error) {

@@ -14,6 +14,7 @@ const ContaService_1 = require("../services/ContaService");
 const conta_schema_1 = require("../validators/conta.schema");
 const zod_1 = require("zod");
 const redisClient_1 = require("../redisClient");
+const CartaoService_1 = require("../services/CartaoService");
 const CACHE_TTL = 86400; // 86400 segundos (1 dia)
 const createConta = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -93,18 +94,31 @@ const updateConta = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.updateConta = updateConta;
+// --- DELETE CONTA ---
 const deleteConta = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const conta = yield ContaService_1.ContaService.findById(req.params.id);
         if (!conta)
             return res.status(404).json({ success: false, message: 'Conta não encontrada.' });
+        const userId = conta.userId;
+        // Deleta todos os cartões associados à conta
+        const cartoes = conta.cartoes || [];
+        for (const cartao of cartoes) {
+            yield CartaoService_1.CartaoService.delete(cartao.id);
+            // Limpa cache individual do cartão
+            yield redisClient_1.redisClient.del(`cartao:${cartao.id}`);
+            yield redisClient_1.redisClient.del(`cartaoResumo:${cartao.id}`);
+        }
+        // Deleta a conta
         yield ContaService_1.ContaService.delete(req.params.id);
-        // Invalida cache
+        // Invalida caches relacionados
         yield redisClient_1.redisClient.del('contas_all');
         yield redisClient_1.redisClient.del(`conta_${req.params.id}`);
-        if (conta.userId)
-            yield redisClient_1.redisClient.del(`contas_user_${conta.userId}`);
-        res.status(200).json({ success: true, message: 'Conta excluída com sucesso.' });
+        if (userId) {
+            yield redisClient_1.redisClient.del(`contas_user_${userId}`);
+            yield redisClient_1.redisClient.del(`cartoes:${userId}`);
+        }
+        res.status(200).json({ success: true, message: 'Conta e cartões associados excluídos com sucesso.' });
     }
     catch (error) {
         next(error);

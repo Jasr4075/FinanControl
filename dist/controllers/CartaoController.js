@@ -107,17 +107,20 @@ const updateCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.updateCartao = updateCartao;
-// --- Deletar cartão ---
+// --- DELETE CARTÃO ---
 const deleteCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const deleted = yield CartaoService_1.CartaoService.delete(req.params.id);
-        if (!deleted)
+        const cartao = yield CartaoService_1.CartaoService.findById(req.params.id);
+        if (!cartao)
             return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
-        // Limpa cache
+        const userId = cartao.userId;
+        // Deleta o cartão
+        yield CartaoService_1.CartaoService.delete(req.params.id);
+        // Invalida caches relacionados
         yield redisClient_1.redisClient.del(`cartao:${req.params.id}`);
         yield redisClient_1.redisClient.del(`cartaoResumo:${req.params.id}`);
-        // opcional: limpar cache geral do usuário se tiver
-        // await redisClient.del(`cartoes:${userId}`)
+        if (userId)
+            yield redisClient_1.redisClient.del(`cartoes:${userId}`);
         res.status(200).json({ success: true, message: 'Cartão excluído com sucesso.' });
     }
     catch (error) {

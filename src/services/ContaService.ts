@@ -45,7 +45,9 @@ export class ContaService {
   }
 
   static async findById(id: string) {
-    return await Conta.findByPk(id, { include: includeRelations })
+    return await Conta.findByPk(id, { 
+      include: includeRelations 
+    })
   }
 
   static async update(id: string, data: Partial<{

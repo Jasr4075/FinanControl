@@ -3,6 +3,8 @@ import { ContaService } from '../services/ContaService';
 import { contaCreateSchema, contaUpdateSchema } from '../validators/conta.schema';
 import { z } from 'zod';
 import { redisClient } from '../redisClient';
+import { CartaoService } from '../services/CartaoService';
+
 
 const CACHE_TTL = 86400; // 86400 segundos (1 dia)
 
@@ -89,19 +91,35 @@ export const updateConta = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+// --- DELETE CONTA ---
 export const deleteConta = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const conta = await ContaService.findById(req.params.id);
     if (!conta) return res.status(404).json({ success: false, message: 'Conta não encontrada.' });
 
+    const userId = conta.userId;
+
+    // Deleta todos os cartões associados à conta
+    const cartoes = conta.cartoes || [];
+    for (const cartao of cartoes) {
+      await CartaoService.delete(cartao.id);
+      // Limpa cache individual do cartão
+      await redisClient.del(`cartao:${cartao.id}`);
+      await redisClient.del(`cartaoResumo:${cartao.id}`);
+    }
+
+    // Deleta a conta
     await ContaService.delete(req.params.id);
 
-    // Invalida cache
+    // Invalida caches relacionados
     await redisClient.del('contas_all');
     await redisClient.del(`conta_${req.params.id}`);
-    if (conta.userId) await redisClient.del(`contas_user_${conta.userId}`);
+    if (userId) {
+      await redisClient.del(`contas_user_${userId}`);
+      await redisClient.del(`cartoes:${userId}`);
+    }
 
-    res.status(200).json({ success: true, message: 'Conta excluída com sucesso.' });
+    res.status(200).json({ success: true, message: 'Conta e cartões associados excluídos com sucesso.' });
   } catch (error) {
     next(error);
   }

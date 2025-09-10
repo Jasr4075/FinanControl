@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Conta = void 0;
 const sequelize_1 = require("sequelize");
 const config_1 = require("../config/config");
-const Usuario_1 = require("./Usuario");
 class Conta extends sequelize_1.Model {
 }
 exports.Conta = Conta;
@@ -64,12 +63,4 @@ Conta.init({
         { fields: ['user_id'] },
         { fields: ['type'] },
     ],
-});
-Conta.belongsTo(Usuario_1.Usuario, {
-    foreignKey: 'userId',
-    as: 'usuario',
-});
-Usuario_1.Usuario.hasMany(Conta, {
-    foreignKey: 'userId',
-    as: 'contas',
 });

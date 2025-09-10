@@ -8,6 +8,7 @@ import {
 } from 'sequelize'
 import { sequelize } from '../config/config'
 import { Usuario } from './Usuario'
+import { Cartao } from './Cartao'
 
 export class Conta extends Model<
     InferAttributes<Conta>,
@@ -22,6 +23,7 @@ export class Conta extends Model<
     declare saldo: number
     declare efetivo: boolean
     declare cdiPercent: number
+    declare cartoes?: Cartao[]
 }
 
 Conta.init(
@@ -85,13 +87,3 @@ Conta.init(
         ],
     }
 )
-
-Conta.belongsTo(Usuario, {
-    foreignKey: 'userId',
-    as: 'usuario',
-})
-
-Usuario.hasMany(Conta, {
-    foreignKey: 'userId',
-    as: 'contas',
-})

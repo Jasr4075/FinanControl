@@ -114,22 +114,4 @@ Cartao.init(
     }
 )
 
-Usuario.hasMany(Cartao, {
-    foreignKey: 'userId',
-    as: 'cartoes',
-})
 
-Cartao.belongsTo(Usuario, {
-    foreignKey: 'userId',
-    as: 'usuario',
-})
-
-Conta.hasMany(Cartao, {
-    foreignKey: 'contaId',
-    as: 'cartoes',
-})
-
-Cartao.belongsTo(Conta, {
-    foreignKey: 'contaId',
-    as: 'conta',
-})

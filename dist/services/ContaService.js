@@ -44,7 +44,9 @@ class ContaService {
     }
     static findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield Conta_1.Conta.findByPk(id, { include: includeRelations });
+            return yield Conta_1.Conta.findByPk(id, {
+                include: includeRelations
+            });
         });
     }
     static update(id, data) {

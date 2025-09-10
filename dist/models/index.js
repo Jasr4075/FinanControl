@@ -15,3 +15,4 @@ require("./Setting");
 require("./Notificacao");
 require("./TransacoesRecorrentes");
 require("./RefreshToken");
+require("./associations");
