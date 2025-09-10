@@ -21,7 +21,7 @@ const errorHandler_1 = require("../middlewares/errorHandler");
 class UsuarioService {
     // Remove campo hash antes de enviar para o cliente
     static sanitizeUser(usuario) {
-        const userData = usuario.toJSON();
+        const userData = typeof usuario.toJSON === 'function' ? usuario.toJSON() : Object.assign({}, usuario);
         delete userData.hash;
         return userData;
     }

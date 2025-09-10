@@ -6,11 +6,11 @@ import { AppError } from '../middlewares/errorHandler';
 
 export class UsuarioService {
   // Remove campo hash antes de enviar para o cliente
-  static sanitizeUser(usuario: Usuario) {
-    const userData = usuario.toJSON() as any;
-    delete userData.hash;
-    return userData;
-  }
+static sanitizeUser(usuario: Usuario | any) {
+  const userData = typeof usuario.toJSON === 'function' ? usuario.toJSON() : { ...usuario };
+  delete userData.hash;
+  return userData;
+}
 
   // Cria um usuário com senha criptografada
   static async create(data: {

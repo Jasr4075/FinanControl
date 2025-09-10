@@ -20,7 +20,7 @@ function getUserCached(username) {
             return JSON.parse(cached);
         const user = yield UsuarioService_1.UsuarioService.findByUsernameRaw(username);
         if (user) {
-            yield redisClient_1.redisClient.set(key, JSON.stringify(user), { EX: 300 }); // 5 minutos
+            yield redisClient_1.redisClient.set(key, JSON.stringify(user.get({ plain: true })), { EX: 300 });
         }
         return user;
     });

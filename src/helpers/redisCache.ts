@@ -9,7 +9,8 @@ export async function getUserCached(username: string) {
 
   const user = await UsuarioService.findByUsernameRaw(username);
   if (user) {
-    await redisClient.set(key, JSON.stringify(user), { EX: 300 }); // 5 minutos
+    await redisClient.set(key, JSON.stringify(user.get({ plain: true })), { EX: 300 });
   }
+
   return user;
 }
