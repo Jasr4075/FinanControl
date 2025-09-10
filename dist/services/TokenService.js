@@ -14,8 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TokenService = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const RefreshToken_1 = require("../models/RefreshToken");
 const uuid_1 = require("uuid");
+const redisClient_1 = require("../redisClient");
 const secret = process.env.JWT_SECRET || 'supersecret';
 class TokenService {
     static gerarToken(payload, expiresIn) {
@@ -30,27 +30,28 @@ class TokenService {
             return null;
         }
     }
-    // Gera e salva um refresh token para o usuário (não apaga outros tokens)
+    // Agora gera refresh token em Redis
     static gerarRefreshToken(userId_1) {
         return __awaiter(this, arguments, void 0, function* (userId, expiresInDays = 7) {
-            const token = (0, uuid_1.v4)() + '.' + (0, uuid_1.v4)();
-            const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
-            return yield RefreshToken_1.RefreshToken.create({ token, userId, expiresAt });
+            const token = (0, uuid_1.v4)() + "." + (0, uuid_1.v4)();
+            const ttl = expiresInDays * 24 * 60 * 60; // segundos
+            yield redisClient_1.redisClient.set(`refresh:${token}`, userId, { EX: ttl });
+            return { token };
         });
     }
     // Valida e retorna o refresh token se válido
     static validarRefreshToken(token) {
         return __awaiter(this, void 0, void 0, function* () {
-            const found = yield RefreshToken_1.RefreshToken.findOne({ where: { token } });
-            if (!found || found.expiresAt < new Date())
+            const userId = yield redisClient_1.redisClient.get(`refresh:${token}`);
+            if (!userId)
                 return null;
-            return found;
+            return userId ? { userId } : null;
         });
     }
     // Revoga (deleta) o refresh token
     static revogarRefreshToken(token) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield RefreshToken_1.RefreshToken.destroy({ where: { token } });
+            yield redisClient_1.redisClient.del(`refresh:${token}`);
         });
     }
 }

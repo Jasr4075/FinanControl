@@ -19,6 +19,8 @@ const Parcela_1 = require("../models/Parcela");
 const sequelize_1 = require("sequelize");
 const ParcelaService_1 = require("./ParcelaService");
 const date_fns_1 = require("date-fns");
+const CACHE_TTL_SHORT = 900; // 15 minutos
+const CACHE_TTL_LONG = 3600; // 1 hora
 const includeRelations = [
     { model: Usuario_1.Usuario, as: 'usuario', attributes: ['id', 'nome', 'email'] },
     { model: Conta_1.Conta, as: 'conta', attributes: ['id', 'bancoNome'] },

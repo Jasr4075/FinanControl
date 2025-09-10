@@ -13,6 +13,8 @@ exports.deleteCartao = exports.updateCartao = exports.getCartaoResumo = exports.
 const CartaoService_1 = require("../services/CartaoService");
 const cartao_schema_1 = require("../validators/cartao.schema");
 const zod_1 = require("zod");
+const redisClient_1 = require("../redisClient"); // assume que já tem cliente Redis configurado
+const CACHE_TTL = 3600;
 // --- Criar cartão ---
 const createCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -20,28 +22,33 @@ const createCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         const userId = (authUser === null || authUser === void 0 ? void 0 : authUser.id) || (authUser === null || authUser === void 0 ? void 0 : authUser.userId) || (authUser === null || authUser === void 0 ? void 0 : authUser.sub);
         if (!userId)
             return res.status(400).json({ success: false, message: 'Usuário não identificado.' });
-        // Força userId do token e ajusta tipos numéricos vindos como string
-        const payload = Object.assign(Object.assign({}, req.body), { userId, creditLimit: req.body.creditLimit !== undefined ? Number(req.body.creditLimit) : undefined, cashbackPercent: req.body.cashbackPercent !== undefined ? Number(req.body.cashbackPercent) : undefined, closingDay: req.body.closingDay, dueDay: req.body.dueDay });
+        const payload = Object.assign(Object.assign({}, req.body), { userId, creditLimit: req.body.creditLimit !== undefined ? Number(req.body.creditLimit) : undefined, cashbackPercent: req.body.cashbackPercent !== undefined ? Number(req.body.cashbackPercent) : undefined });
         const validatedCartao = cartao_schema_1.cartaoCreateSchema.parse(payload);
         const cartao = yield CartaoService_1.CartaoService.create(validatedCartao);
+        // Limpa cache do usuário, pois criamos um novo cartão
+        yield redisClient_1.redisClient.del(`cartoes:${userId}`);
         res.status(201).json({ success: true, data: cartao });
     }
     catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
+        if (error instanceof zod_1.z.ZodError)
             return res.status(400).json({ success: false, errors: error.errors });
-        }
         next(error);
     }
 });
 exports.createCartao = createCartao;
-// --- Listar todos os cartões ---
+// --- Listar todos os cartões do usuário ---
 const getCartoes = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = req.user;
         const userId = (user === null || user === void 0 ? void 0 : user.id) || (user === null || user === void 0 ? void 0 : user.userId) || (user === null || user === void 0 ? void 0 : user.sub);
         if (!userId)
             return res.status(400).json({ success: false, message: 'Usuário não identificado no token.' });
+        const cacheKey = `cartoes:${userId}`;
+        const cached = yield redisClient_1.redisClient.get(cacheKey);
+        if (cached)
+            return res.status(200).json({ success: true, data: JSON.parse(cached) });
         const cartoes = yield CartaoService_1.CartaoService.findAllByUser(userId);
+        yield redisClient_1.redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(cartoes));
         res.status(200).json({ success: true, data: cartoes });
     }
     catch (error) {
@@ -52,9 +59,14 @@ exports.getCartoes = getCartoes;
 // --- Buscar cartão por ID ---
 const getCartaoById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const cacheKey = `cartao:${req.params.id}`;
+        const cached = yield redisClient_1.redisClient.get(cacheKey);
+        if (cached)
+            return res.status(200).json({ success: true, data: JSON.parse(cached) });
         const cartao = yield CartaoService_1.CartaoService.findById(req.params.id);
         if (!cartao)
             return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
+        yield redisClient_1.redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(cartao));
         res.status(200).json({ success: true, data: cartao });
     }
     catch (error) {
@@ -62,9 +74,15 @@ const getCartaoById = (req, res, next) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.getCartaoById = getCartaoById;
+// --- Resumo do cartão ---
 const getCartaoResumo = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const cacheKey = `cartaoResumo:${req.params.id}`;
+        const cached = yield redisClient_1.redisClient.get(cacheKey);
+        if (cached)
+            return res.status(200).json({ success: true, data: JSON.parse(cached) });
         const resumo = yield CartaoService_1.CartaoService.resumo(req.params.id);
+        yield redisClient_1.redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(resumo));
         res.status(200).json({ success: true, data: resumo });
     }
     catch (error) {
@@ -75,10 +93,13 @@ exports.getCartaoResumo = getCartaoResumo;
 // --- Atualizar cartão ---
 const updateCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // Aqui você pode criar um schema de update opcional, se quiser validação parcial
         const cartao = yield CartaoService_1.CartaoService.update(req.params.id, req.body);
         if (!cartao)
             return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
+        // Limpa cache do cartão e resumo
+        yield redisClient_1.redisClient.del(`cartao:${req.params.id}`);
+        yield redisClient_1.redisClient.del(`cartaoResumo:${req.params.id}`);
+        yield redisClient_1.redisClient.del(`cartoes:${cartao.userId}`);
         res.status(200).json({ success: true, data: cartao });
     }
     catch (error) {
@@ -92,6 +113,11 @@ const deleteCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         const deleted = yield CartaoService_1.CartaoService.delete(req.params.id);
         if (!deleted)
             return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
+        // Limpa cache
+        yield redisClient_1.redisClient.del(`cartao:${req.params.id}`);
+        yield redisClient_1.redisClient.del(`cartaoResumo:${req.params.id}`);
+        // opcional: limpar cache geral do usuário se tiver
+        // await redisClient.del(`cartoes:${userId}`)
         res.status(200).json({ success: true, message: 'Cartão excluído com sucesso.' });
     }
     catch (error) {

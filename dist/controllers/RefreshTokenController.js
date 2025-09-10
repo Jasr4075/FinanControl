@@ -15,15 +15,19 @@ const UsuarioService_1 = require("../services/UsuarioService");
 const refreshToken = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { refreshToken } = req.body;
-        if (!refreshToken)
-            return res.status(400).json({ erro: 'Refresh token é obrigatório.' });
+        if (!refreshToken) {
+            return res.status(400).json({ erro: "Refresh token é obrigatório." });
+        }
+        // ✅ Valida refresh token no Redis
         const tokenObj = yield TokenService_1.TokenService.validarRefreshToken(refreshToken);
-        if (!tokenObj)
-            return res.status(401).json({ erro: 'Refresh token inválido ou expirado.' });
+        if (!tokenObj) {
+            return res.status(401).json({ erro: "Refresh token inválido ou expirado." });
+        }
         const usuario = yield UsuarioService_1.UsuarioService.findById(tokenObj.userId);
-        if (!usuario)
-            return res.status(404).json({ erro: 'Usuário não encontrado.' });
-        // Rotação: revoga o refresh token antigo e gera um novo
+        if (!usuario) {
+            return res.status(404).json({ erro: "Usuário não encontrado." });
+        }
+        // ♻️ Rotação: revoga o antigo e gera um novo
         yield TokenService_1.TokenService.revogarRefreshToken(refreshToken);
         const novoRefreshToken = yield TokenService_1.TokenService.gerarRefreshToken(usuario.id);
         const token = TokenService_1.TokenService.gerarToken({
@@ -31,7 +35,11 @@ const refreshToken = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             username: usuario.username,
             role: usuario.role,
         });
-        res.json({ token, refreshToken: novoRefreshToken.token, user: usuario });
+        res.json({
+            token,
+            refreshToken: novoRefreshToken.token,
+            user: usuario,
+        });
     }
     catch (err) {
         next(err);
@@ -41,8 +49,10 @@ exports.refreshToken = refreshToken;
 const revokeRefreshToken = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { refreshToken } = req.body;
-        if (!refreshToken)
-            return res.status(400).json({ erro: 'Refresh token é obrigatório.' });
+        if (!refreshToken) {
+            return res.status(400).json({ erro: "Refresh token é obrigatório." });
+        }
+        // ✅ Agora revoga só no Redis
         yield TokenService_1.TokenService.revogarRefreshToken(refreshToken);
         res.json({ success: true });
     }
