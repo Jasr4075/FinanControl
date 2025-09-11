@@ -112,6 +112,8 @@ export const deleteConta = async (req: Request, res: Response, next: NextFunctio
       await CartaoService.delete(cartao.id);
       await redisClient.del(`cartao:${cartao.id}`);
       await redisClient.del(`cartaoResumo:${cartao.id}`);
+      await redisClient.del(`cartoes:${userId}`);
+
     }
 
     await ContaService.delete(req.params.id);

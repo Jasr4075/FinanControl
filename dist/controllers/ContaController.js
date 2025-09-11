@@ -111,6 +111,7 @@ const deleteConta = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
             yield CartaoService_1.CartaoService.delete(cartao.id);
             yield redisClient_1.redisClient.del(`cartao:${cartao.id}`);
             yield redisClient_1.redisClient.del(`cartaoResumo:${cartao.id}`);
+            yield redisClient_1.redisClient.del(`cartoes:${userId}`);
         }
         yield ContaService_1.ContaService.delete(req.params.id);
         yield refreshContaCache(undefined, userId);
