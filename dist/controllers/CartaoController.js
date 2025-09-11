@@ -13,9 +13,24 @@ exports.deleteCartao = exports.updateCartao = exports.getCartaoResumo = exports.
 const CartaoService_1 = require("../services/CartaoService");
 const cartao_schema_1 = require("../validators/cartao.schema");
 const zod_1 = require("zod");
-const redisClient_1 = require("../redisClient"); // assume que já tem cliente Redis configurado
+const redisClient_1 = require("../redisClient");
 const CACHE_TTL = 3600;
-// --- Criar cartão ---
+function refreshCartaoCache(cartaoId, userId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (cartaoId) {
+            const cartao = yield CartaoService_1.CartaoService.findById(cartaoId);
+            if (cartao) {
+                yield redisClient_1.redisClient.set(`cartao:${cartaoId}`, JSON.stringify(cartao), { EX: CACHE_TTL });
+                const resumo = yield CartaoService_1.CartaoService.resumo(cartaoId);
+                yield redisClient_1.redisClient.set(`cartaoResumo:${cartaoId}`, JSON.stringify(resumo), { EX: CACHE_TTL });
+            }
+        }
+        if (userId) {
+            const cartoes = yield CartaoService_1.CartaoService.findAllByUser(userId);
+            yield redisClient_1.redisClient.set(`cartoes:${userId}`, JSON.stringify(cartoes), { EX: CACHE_TTL });
+        }
+    });
+}
 const createCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const authUser = req.user;
@@ -25,8 +40,7 @@ const createCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         const payload = Object.assign(Object.assign({}, req.body), { userId, creditLimit: req.body.creditLimit !== undefined ? Number(req.body.creditLimit) : undefined, cashbackPercent: req.body.cashbackPercent !== undefined ? Number(req.body.cashbackPercent) : undefined });
         const validatedCartao = cartao_schema_1.cartaoCreateSchema.parse(payload);
         const cartao = yield CartaoService_1.CartaoService.create(validatedCartao);
-        // Limpa cache do usuário, pois criamos um novo cartão
-        yield redisClient_1.redisClient.del(`cartoes:${userId}`);
+        yield refreshCartaoCache(cartao === null || cartao === void 0 ? void 0 : cartao.id, userId);
         res.status(201).json({ success: true, data: cartao });
     }
     catch (error) {
@@ -36,7 +50,6 @@ const createCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.createCartao = createCartao;
-// --- Listar todos os cartões do usuário ---
 const getCartoes = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = req.user;
@@ -45,10 +58,11 @@ const getCartoes = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
             return res.status(400).json({ success: false, message: 'Usuário não identificado no token.' });
         const cacheKey = `cartoes:${userId}`;
         const cached = yield redisClient_1.redisClient.get(cacheKey);
-        if (cached)
+        if (cached) {
             return res.status(200).json({ success: true, data: JSON.parse(cached) });
+        }
         const cartoes = yield CartaoService_1.CartaoService.findAllByUser(userId);
-        yield redisClient_1.redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(cartoes));
+        yield redisClient_1.redisClient.set(cacheKey, JSON.stringify(cartoes), { EX: CACHE_TTL });
         res.status(200).json({ success: true, data: cartoes });
     }
     catch (error) {
@@ -56,17 +70,17 @@ const getCartoes = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.getCartoes = getCartoes;
-// --- Buscar cartão por ID ---
 const getCartaoById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const cacheKey = `cartao:${req.params.id}`;
         const cached = yield redisClient_1.redisClient.get(cacheKey);
-        if (cached)
+        if (cached) {
             return res.status(200).json({ success: true, data: JSON.parse(cached) });
+        }
         const cartao = yield CartaoService_1.CartaoService.findById(req.params.id);
         if (!cartao)
             return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
-        yield redisClient_1.redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(cartao));
+        yield redisClient_1.redisClient.set(cacheKey, JSON.stringify(cartao), { EX: CACHE_TTL });
         res.status(200).json({ success: true, data: cartao });
     }
     catch (error) {
@@ -74,15 +88,15 @@ const getCartaoById = (req, res, next) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.getCartaoById = getCartaoById;
-// --- Resumo do cartão ---
 const getCartaoResumo = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const cacheKey = `cartaoResumo:${req.params.id}`;
         const cached = yield redisClient_1.redisClient.get(cacheKey);
-        if (cached)
+        if (cached) {
             return res.status(200).json({ success: true, data: JSON.parse(cached) });
+        }
         const resumo = yield CartaoService_1.CartaoService.resumo(req.params.id);
-        yield redisClient_1.redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(resumo));
+        yield redisClient_1.redisClient.set(cacheKey, JSON.stringify(resumo), { EX: CACHE_TTL });
         res.status(200).json({ success: true, data: resumo });
     }
     catch (error) {
@@ -90,16 +104,12 @@ const getCartaoResumo = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.getCartaoResumo = getCartaoResumo;
-// --- Atualizar cartão ---
 const updateCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const cartao = yield CartaoService_1.CartaoService.update(req.params.id, req.body);
         if (!cartao)
             return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
-        // Limpa cache do cartão e resumo
-        yield redisClient_1.redisClient.del(`cartao:${req.params.id}`);
-        yield redisClient_1.redisClient.del(`cartaoResumo:${req.params.id}`);
-        yield redisClient_1.redisClient.del(`cartoes:${cartao.userId}`);
+        yield refreshCartaoCache(cartao.id, cartao.userId);
         res.status(200).json({ success: true, data: cartao });
     }
     catch (error) {
@@ -107,20 +117,16 @@ const updateCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.updateCartao = updateCartao;
-// --- DELETE CARTÃO ---
 const deleteCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const cartao = yield CartaoService_1.CartaoService.findById(req.params.id);
         if (!cartao)
             return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
         const userId = cartao.userId;
-        // Deleta o cartão
         yield CartaoService_1.CartaoService.delete(req.params.id);
-        // Invalida caches relacionados
+        yield refreshCartaoCache(undefined, userId);
         yield redisClient_1.redisClient.del(`cartao:${req.params.id}`);
         yield redisClient_1.redisClient.del(`cartaoResumo:${req.params.id}`);
-        if (userId)
-            yield redisClient_1.redisClient.del(`cartoes:${userId}`);
         res.status(200).json({ success: true, message: 'Cartão excluído com sucesso.' });
     }
     catch (error) {
