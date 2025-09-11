@@ -7,7 +7,7 @@ import { redisClient } from '../redisClient';
 const CACHE_TTL_SHORT = 5;
 const CACHE_TTL_LONG = 15;
 
-
+// --- GET POR ID ---
 export const getDespesaById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const cacheKey = `despesa:${req.params.id}`;
@@ -24,6 +24,7 @@ export const getDespesaById = async (req: Request, res: Response, next: NextFunc
   }
 };
 
+// --- ÚLTIMAS DESPESAS ---
 export const getUltimasDespesas = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.params.userId;
@@ -39,6 +40,7 @@ export const getUltimasDespesas = async (req: Request, res: Response, next: Next
   }
 };
 
+// --- DESPESAS DO MÊS ATUAL ---
 export const getDespesasMesAtual = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.params.userId;
@@ -54,6 +56,7 @@ export const getDespesasMesAtual = async (req: Request, res: Response, next: Nex
   }
 };
 
+// --- TOTAL DE DESPESAS ---
 export const getTotalDespesasMes = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { ano, mes } = req.query;
@@ -63,12 +66,9 @@ export const getTotalDespesasMes = async (req: Request, res: Response, next: Nex
     const cached = await redisClient.get(cacheKey);
     if (cached) return res.status(200).json({ success: true, total: Number(cached) });
 
-    let total: number;
-    if (ano && mes) {
-      total = await DespesaService.getTotalByMonth(userId, Number(ano), Number(mes));
-    } else {
-      total = await DespesaService.getTotalMes(userId);
-    }
+    const total = ano && mes
+      ? await DespesaService.getTotalByMonth(userId, Number(ano), Number(mes))
+      : await DespesaService.getTotalMes(userId);
 
     await redisClient.setEx(cacheKey, CACHE_TTL_SHORT, total.toString());
     res.status(200).json({ success: true, total });
@@ -77,13 +77,14 @@ export const getTotalDespesasMes = async (req: Request, res: Response, next: Nex
   }
 };
 
+// --- CREATE ---
 export const createDespesa = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = despesaCreateSchema.parse(req.body);
     const despesa = await DespesaService.create(data);
 
-    // invalidar caches relacionados ao usuário
     const userId = data.userId;
+    // invalidar caches do usuário
     await redisClient.del(`ultimasDespesas:${userId}`);
     await redisClient.del(`despesasMesAtual:${userId}`);
     await redisClient.del(`totalDespesas:${userId}:mesAtual`);
@@ -95,17 +96,16 @@ export const createDespesa = async (req: Request, res: Response, next: NextFunct
   }
 };
 
+// --- UPDATE ---
 export const updateDespesa = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = despesaUpdateSchema.parse(req.body);
     const despesa = await DespesaService.update(req.params.id, data);
 
-    if (!despesa) {
-      return res.status(404).json({ success: false, message: 'Despesa não encontrada.' });
-    }
+    if (!despesa) return res.status(404).json({ success: false, message: 'Despesa não encontrada.' });
 
-    // invalidar caches relacionados ao usuário
     const userId = despesa.userId;
+    // invalidar caches do usuário e do item específico
     await redisClient.del(`ultimasDespesas:${userId}`);
     await redisClient.del(`despesasMesAtual:${userId}`);
     await redisClient.del(`totalDespesas:${userId}:mesAtual`);
@@ -118,17 +118,14 @@ export const updateDespesa = async (req: Request, res: Response, next: NextFunct
   }
 };
 
+// --- DELETE ---
 export const deleteDespesa = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const despesa = await DespesaService.delete(req.params.id);
-    
-    if (!despesa) {
-      return res.status(404).json({ success: false, message: 'Despesa não encontrada.' });
-    }
+    if (!despesa) return res.status(404).json({ success: false, message: 'Despesa não encontrada.' });
 
-    const userId = despesa.userId; // pegar do registro deletado
-
-    // invalidar caches relacionados ao usuário
+    const userId = despesa.userId;
+    // invalidar caches do usuário e do item específico
     await redisClient.del(`ultimasDespesas:${userId}`);
     await redisClient.del(`despesasMesAtual:${userId}`);
     await redisClient.del(`totalDespesas:${userId}:mesAtual`);
@@ -139,4 +136,3 @@ export const deleteDespesa = async (req: Request, res: Response, next: NextFunct
     next(error);
   }
 };
-
