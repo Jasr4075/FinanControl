@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getContasByUserId = exports.deleteConta = exports.updateConta = exports.getContaById = exports.getContas = exports.createConta = void 0;
+exports.refreshContaCache = refreshContaCache;
 const ContaService_1 = require("../services/ContaService");
 const conta_schema_1 = require("../validators/conta.schema");
 const zod_1 = require("zod");

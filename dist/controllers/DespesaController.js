@@ -16,6 +16,7 @@ const zod_1 = require("zod");
 const redisClient_1 = require("../redisClient");
 const CACHE_TTL_SHORT = 5;
 const CACHE_TTL_LONG = 15;
+// --- GET POR ID ---
 const getDespesaById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const cacheKey = `despesa:${req.params.id}`;
@@ -33,6 +34,7 @@ const getDespesaById = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.getDespesaById = getDespesaById;
+// --- ÚLTIMAS DESPESAS ---
 const getUltimasDespesas = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.params.userId;
@@ -49,6 +51,7 @@ const getUltimasDespesas = (req, res, next) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.getUltimasDespesas = getUltimasDespesas;
+// --- DESPESAS DO MÊS ATUAL ---
 const getDespesasMesAtual = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.params.userId;
@@ -65,6 +68,7 @@ const getDespesasMesAtual = (req, res, next) => __awaiter(void 0, void 0, void 0
     }
 });
 exports.getDespesasMesAtual = getDespesasMesAtual;
+// --- TOTAL DE DESPESAS ---
 const getTotalDespesasMes = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { ano, mes } = req.query;
@@ -73,13 +77,9 @@ const getTotalDespesasMes = (req, res, next) => __awaiter(void 0, void 0, void 0
         const cached = yield redisClient_1.redisClient.get(cacheKey);
         if (cached)
             return res.status(200).json({ success: true, total: Number(cached) });
-        let total;
-        if (ano && mes) {
-            total = yield DespesaService_1.DespesaService.getTotalByMonth(userId, Number(ano), Number(mes));
-        }
-        else {
-            total = yield DespesaService_1.DespesaService.getTotalMes(userId);
-        }
+        const total = ano && mes
+            ? yield DespesaService_1.DespesaService.getTotalByMonth(userId, Number(ano), Number(mes))
+            : yield DespesaService_1.DespesaService.getTotalMes(userId);
         yield redisClient_1.redisClient.setEx(cacheKey, CACHE_TTL_SHORT, total.toString());
         res.status(200).json({ success: true, total });
     }
@@ -88,12 +88,13 @@ const getTotalDespesasMes = (req, res, next) => __awaiter(void 0, void 0, void 0
     }
 });
 exports.getTotalDespesasMes = getTotalDespesasMes;
+// --- CREATE ---
 const createDespesa = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const data = despesa_schema_1.despesaCreateSchema.parse(req.body);
         const despesa = yield DespesaService_1.DespesaService.create(data);
-        // invalidar caches relacionados ao usuário
         const userId = data.userId;
+        // invalidar caches do usuário
         yield redisClient_1.redisClient.del(`ultimasDespesas:${userId}`);
         yield redisClient_1.redisClient.del(`despesasMesAtual:${userId}`);
         yield redisClient_1.redisClient.del(`totalDespesas:${userId}:mesAtual`);
@@ -106,15 +107,15 @@ const createDespesa = (req, res, next) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.createDespesa = createDespesa;
+// --- UPDATE ---
 const updateDespesa = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const data = despesa_schema_1.despesaUpdateSchema.parse(req.body);
         const despesa = yield DespesaService_1.DespesaService.update(req.params.id, data);
-        if (!despesa) {
+        if (!despesa)
             return res.status(404).json({ success: false, message: 'Despesa não encontrada.' });
-        }
-        // invalidar caches relacionados ao usuário
         const userId = despesa.userId;
+        // invalidar caches do usuário e do item específico
         yield redisClient_1.redisClient.del(`ultimasDespesas:${userId}`);
         yield redisClient_1.redisClient.del(`despesasMesAtual:${userId}`);
         yield redisClient_1.redisClient.del(`totalDespesas:${userId}:mesAtual`);
@@ -128,14 +129,14 @@ const updateDespesa = (req, res, next) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.updateDespesa = updateDespesa;
+// --- DELETE ---
 const deleteDespesa = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const despesa = yield DespesaService_1.DespesaService.delete(req.params.id);
-        if (!despesa) {
+        if (!despesa)
             return res.status(404).json({ success: false, message: 'Despesa não encontrada.' });
-        }
-        const userId = despesa.userId; // pegar do registro deletado
-        // invalidar caches relacionados ao usuário
+        const userId = despesa.userId;
+        // invalidar caches do usuário e do item específico
         yield redisClient_1.redisClient.del(`ultimasDespesas:${userId}`);
         yield redisClient_1.redisClient.del(`despesasMesAtual:${userId}`);
         yield redisClient_1.redisClient.del(`totalDespesas:${userId}:mesAtual`);

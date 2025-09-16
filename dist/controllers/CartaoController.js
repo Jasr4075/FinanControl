@@ -14,6 +14,7 @@ const CartaoService_1 = require("../services/CartaoService");
 const cartao_schema_1 = require("../validators/cartao.schema");
 const zod_1 = require("zod");
 const redisClient_1 = require("../redisClient");
+const ContaController_1 = require("./ContaController");
 const CACHE_TTL = 3600;
 function refreshCartaoCache(cartaoId, userId) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -41,6 +42,7 @@ const createCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         const validatedCartao = cartao_schema_1.cartaoCreateSchema.parse(payload);
         const cartao = yield CartaoService_1.CartaoService.create(validatedCartao);
         yield refreshCartaoCache(cartao === null || cartao === void 0 ? void 0 : cartao.id, userId);
+        yield (0, ContaController_1.refreshContaCache)(undefined, userId);
         res.status(201).json({ success: true, data: cartao });
     }
     catch (error) {
@@ -110,6 +112,7 @@ const updateCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         if (!cartao)
             return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
         yield refreshCartaoCache(cartao.id, cartao.userId);
+        yield (0, ContaController_1.refreshContaCache)(undefined, cartao.userId);
         res.status(200).json({ success: true, data: cartao });
     }
     catch (error) {
@@ -125,6 +128,7 @@ const deleteCartao = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         const userId = cartao.userId;
         yield CartaoService_1.CartaoService.delete(req.params.id);
         yield refreshCartaoCache(undefined, userId);
+        yield (0, ContaController_1.refreshContaCache)(undefined, userId);
         yield redisClient_1.redisClient.del(`cartao:${req.params.id}`);
         yield redisClient_1.redisClient.del(`cartaoResumo:${req.params.id}`);
         res.status(200).json({ success: true, message: 'Cartão excluído com sucesso.' });
