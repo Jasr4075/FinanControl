@@ -1,4 +1,3 @@
-// src/controllers/ContaController.ts
 import { Request, Response, NextFunction } from 'express';
 import { ContaService } from '../services/ContaService';
 import { contaCreateSchema, contaUpdateSchema } from '../validators/conta.schema';
@@ -8,7 +7,7 @@ import { CartaoService } from '../services/CartaoService';
 
 const CACHE_TTL = 86400;
 
-async function refreshContaCache(contaId?: string, userId?: string) {
+export async function refreshContaCache(contaId?: string, userId?: string) {
   if (contaId) {
     const conta = await ContaService.findById(contaId);
     if (conta) {

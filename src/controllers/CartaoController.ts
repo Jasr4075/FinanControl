@@ -3,6 +3,7 @@ import { CartaoService } from '../services/CartaoService';
 import { cartaoCreateSchema } from '../validators/cartao.schema';
 import { z } from 'zod';
 import { redisClient } from '../redisClient';
+import { refreshContaCache } from './ContaController';
 
 const CACHE_TTL = 3600;
 
@@ -40,6 +41,7 @@ export const createCartao = async (req: Request, res: Response, next: NextFuncti
     const cartao = await CartaoService.create(validatedCartao);
 
     await refreshCartaoCache(cartao?.id, userId);
+      await refreshContaCache(undefined, userId);
 
     res.status(201).json({ success: true, data: cartao });
   } catch (error: any) {
@@ -111,6 +113,7 @@ export const updateCartao = async (req: Request, res: Response, next: NextFuncti
     if (!cartao) return res.status(404).json({ success: false, message: 'Cartão não encontrado.' });
 
     await refreshCartaoCache(cartao.id, cartao.userId);
+    await refreshContaCache(undefined, cartao.userId);
 
     res.status(200).json({ success: true, data: cartao });
   } catch (error) {
@@ -128,6 +131,7 @@ export const deleteCartao = async (req: Request, res: Response, next: NextFuncti
     await CartaoService.delete(req.params.id);
 
     await refreshCartaoCache(undefined, userId);
+    await refreshContaCache(undefined, userId);
 
     await redisClient.del(`cartao:${req.params.id}`);
     await redisClient.del(`cartaoResumo:${req.params.id}`);
