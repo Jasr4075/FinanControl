@@ -1,41 +1,605 @@
-> # ***FinanControl***
+# 🔧 FinanControl - Backend API
 
-# Registro de Gastos com Crédito e Débito
+API REST completa para sistema de controle financeiro pessoal desenvolvida com Node.js, TypeScript e PostgreSQL.
 
-## Índice
+## 🎯 Objetivo
 
-- [Registro de Valores](#registro-de-valores)
-- [Registro de Gastos](#registro-de-gastos)
-- [Cálculo de Valor Disponível](#cálculo-de-valor-disponível)
-- [Acompanhamento de Parcelas Futuras](#acompanhamento-de-parcelas-futuras)
-- [Aviso de Vencimento de Fatura](#aviso-de-vencimento-de-fatura)
-- [Cálculo Automático de Fatura Futura](#cálculo-automático-de-fatura-futura)
-- [Classificação de Compras](#classificação-de-compras)
-- [Metas de Gasto por Categoria](#metas-de-gasto-por-categoria)
-- [Alertas ao Ultrapassar Limite](#alertas-ao-ultrapassar-limite)
-- [Definição de Metas de Economia Mensal](#definição-de-metas-de-economia-mensal)
-- [Gráficos de Desempenho em Metas](#gráficos-de-desempenho-em-metas)
-- [Lembretes de pagamentos futuros](#lembretes-de-pagamentos-futuros)
-- [Registro de despesas e receitas recorrentes (ex: aluguel, salário)](#registro-de-despesas-e-receitas-recorrentes-ex-aluguel-salário)
-- [Funcionalidades Adicionais](#funcionalidades-adicionais)
-- [Relacionamento entre Funcionalidades](#relacionamento-entre-funcionalidades)
+Desenvolver uma API robusta e escalável que forneça todos os endpoints necessários para um sistema de controle financeiro pessoal, incluindo gestão de usuários, contas bancárias, cartões de crédito, transações financeiras, metas de economia, notificações e relatórios detalhados.
 
----
+## 🚀 Stack Tecnológico
 
-## Registro de Valores
+- **Node.js** + **TypeScript**
+- **Express.js** (Framework web)
+- **PostgreSQL** (Banco de dados)
+- **Sequelize** (ORM)
+- **Redis** (Cache e sessões)
+- **JWT** (Autenticação)
+- **Zod** (Validação)
+- **MercadoPago** (Pagamentos)
+- **bcrypt** (Criptografia de senhas)
 
-**Funções:**
-- Dinheiro poupado (saldos)
-- Investimentos
-- Valores emprestados
-- Trocas por dinheiro físico
-- Cashback de cartões
-- Limite de crédito por cartão
+## 📁 Estrutura do Projeto
 
-**Relacionamento:**  
-O Registro de Valores influencia diretamente o **Cálculo de Valor Disponível** e a **Definição de Metas de Economia Mensal**, pois o saldo inicial e investimentos impactam o quanto pode ser economizado ou gasto.
+```
+📦 FinanControl/                           # Backend API
+├─ 📄 package.json                         # Dependências e scripts
+├─ 📄 tsconfig.json                        # Configuração TypeScript
+└─ 📁 src/                                 # Código fonte
+   ├─ 🚀 app.ts                            # Configuração Express
+   ├─ 🌐 server.ts                         # Servidor principal
+   ├─ 🔴 redisClient.ts                    # Cliente Redis
+   │
+   ├─ ⚙️ config/                           # Configurações
+   │  └─ config.ts                         # Config da aplicação
+   │
+   ├─ 🎮 controllers/                      # Controladores MVC
+   │  ├─ 🔐 AuthController.ts              # Autenticação
+   │  ├─ 👤 UsuarioController.ts           # Usuários
+   │  ├─ 💳 CartaoController.ts            # Cartões de crédito
+   │  ├─ 🏦 ContaController.ts             # Contas bancárias
+   │  ├─ 📉 DespesaController.ts           # Despesas/gastos
+   │  ├─ 📈 ReceitaController.ts           # Receitas/ingresos
+   │  ├─ 🔄 TransferenciaController.ts     # Transferências
+   │  ├─ 📄 FaturaController.ts            # Faturas
+   │  ├─ 📊 ParcelaController.ts           # Parcelas
+   │  ├─ 🎯 MetaController.ts              # Metas financeiras
+   │  ├─ 🔔 NotificacaoController.ts       # Notificações
+   │  ├─ 🏷️ CategoryController.ts          # Categorias
+   │  ├─ 💰 CashbackController.ts          # Sistema cashback
+   │  ├─ 🔁 TransacoesRecorrentesController.ts # Transações recorrentes
+   │  ├─ ⚙️ SettingController.ts           # Configurações
+   │  └─ 🔄 RefreshTokenController.ts      # Refresh tokens
+   │
+   ├─ 🗄️ database/                         # Configuração BD
+   │  └─ index.ts                          # Setup Sequelize
+   │
+   ├─ 🤝 helpers/                          # Utilitários
+   │  └─ redisCache.ts                     # Cache Redis
+   │
+   ├─ 🛡️ middlewares/                      # Middlewares
+   │  ├─ autenticacao.ts                   # Middleware JWT
+   │  ├─ errorHandler.ts                   # Handler de erros
+   │  └─ validate.ts                       # Validação Zod
+   │
+   ├─ 📊 models/                           # Modelos Sequelize
+   │  ├─ 🏗️ BaseModel.ts                  # Modelo base
+   │  ├─ 👤 Usuario.ts                     # Usuários
+   │  ├─ 💳 Cartao.ts                      # Cartões
+   │  ├─ 🏦 Conta.ts                       # Contas
+   │  ├─ 📉 Despesa.ts                     # Despesas
+   │  ├─ 📈 Receita.ts                     # Receitas
+   │  ├─ 🔄 Transferencia.ts               # Transferências
+   │  ├─ 📄 Fatura.ts                      # Faturas
+   │  ├─ 📊 Parcela.ts                     # Parcelas
+   │  ├─ 🎯 Meta.ts                        # Metas
+   │  ├─ 🔔 Notificacao.ts                 # Notificações
+   │  ├─ 🏷️ Category.ts                    # Categorias
+   │  ├─ 💰 Cashback.ts                    # Cashback
+   │  ├─ 🔁 TransacoesRecorrentes.ts       # Transações recorrentes
+   │  ├─ ⚙️ Setting.ts                     # Configurações
+   │  ├─ 🔄 RefreshToken.ts                # Refresh tokens
+   │  ├─ 🔗 associations.ts                # Relacionamentos
+   │  └─ 📋 index.ts                       # Exportações
+   │
+   ├─ 🛣️ routes/                           # Rotas da API
+   │  ├─ 🔐 auth.routes.ts                 # /api/auth
+   │  ├─ 👤 usuario.routes.ts              # /api/usuarios
+   │  ├─ 💳 cartao.routes.ts               # /api/cartoes
+   │  ├─ 🏦 conta.routes.ts                # /api/contas
+   │  ├─ 📉 despesa.routes.ts              # /api/despesas
+   │  ├─ 📈 receitas.routes.ts             # /api/receitas
+   │  ├─ 🔄 transferencia.routes.ts        # /api/transferencias
+   │  ├─ 📄 fatura.routes.ts               # /api/faturas
+   │  ├─ 📊 parcela.routes.ts              # /api/parcelas
+   │  ├─ 🎯 meta.routes.ts                 # /api/metas
+   │  ├─ 🔔 notificacao.routes.ts          # /api/notificacoes
+   │  ├─ 🏷️ category.routes.ts             # /api/categorias
+   │  ├─ 💰 cashback.routes.ts             # /api/cashback
+   │  ├─ 🔁 transacoesRecorrentes.routes.ts # /api/transacoes-recorrentes
+   │  ├─ ⚙️ setting.routes.ts              # /api/settings
+   │  ├─ 🔄 refreshToken.routes.ts         # /api/token
+   │  └─ 📋 index.ts                       # Router principal
+   │
+   ├─ 🔧 services/                         # Lógica de negócio
+   │  ├─ 👤 UsuarioService.ts              # Serviços de usuário
+   │  ├─ 💳 CartaoService.ts               # Serviços de cartão
+   │  ├─ 🏦 ContaService.ts                # Serviços de conta
+   │  ├─ 📉 DespesaService.ts              # Serviços de despesa
+   │  ├─ 📈 ReceitaService.ts              # Serviços de receita
+   │  ├─ 🔄 TransferenciaService.ts        # Serviços de transferência
+   │  ├─ 📄 FaturaService.ts               # Serviços de fatura
+   │  ├─ 📊 ParcelaService.ts              # Serviços de parcela
+   │  ├─ 🎯 MetaService.ts                 # Serviços de meta
+   │  ├─ 🔔 NotificacaoService.ts          # Serviços de notificação
+   │  ├─ 🏷️ CategoryService.ts             # Serviços de categoria
+   │  ├─ 💰 CashbackService.ts             # Serviços de cashback
+   │  ├─ 🔁 TransacoesRecorrentesService.ts # Serviços recorrentes
+   │  ├─ ⚙️ SettingService.ts              # Serviços de configuração
+   │  └─ 🔑 TokenService.ts                # Serviços de token
+   │
+   └─ ✅ validators/                        # Esquemas Zod
+      ├─ usuario.schema.ts                 # Validação usuário
+      ├─ cartao.schema.ts                  # Validação cartão
+      ├─ conta.schema.ts                   # Validação conta
+      ├─ despesa.schema.ts                 # Validação despesa
+      ├─ receita.schema.ts                 # Validação receita
+      ├─ meta.schema.ts                    # Validação meta
+      ├─ cashback.schema.ts                # Validação cashback
+      └─ transacoesRecorrentes.schema.ts   # Validação recorrentes
+```
 
----
+## 📋 Requisitos Funcionais
+
+### 🔐 Autenticação e Autorização
+- **RF001**: Sistema de login com email e senha
+- **RF002**: Registro de novos usuários
+- **RF003**: Recuperação de senha
+- **RF004**: Autenticação JWT com refresh tokens
+- **RF005**: Middleware de autorização para rotas protegidas
+
+### 💳 Gestão de Cartões e Contas
+- **RF006**: CRUD de cartões de crédito
+- **RF007**: CRUD de contas bancárias
+- **RF008**: Vinculação de cartões às contas
+- **RF009**: Gestão de limites de crédito
+- **RF010**: Cálculo de saldos disponíveis
+
+### 💰 Transações Financeiras
+- **RF011**: Registro de despesas com diferentes formas de pagamento
+- **RF012**: Registro de receitas
+- **RF013**: Transferências entre contas
+- **RF014**: Gestão de parcelas (crédito e Pix parcelado)
+- **RF015**: Sistema de categorização de transações
+- **RF016**: Transações recorrentes automatizadas
+
+### 📊 Cálculos e Projeções
+- **RF017**: Cálculo de valor disponível (diário, semanal, mensal)
+- **RF018**: Projeção automática de faturas futuras
+- **RF019**: Acompanhamento de parcelas pendentes
+- **RF020**: Cálculos de metas de economia
+- **RF021**: Sistema de cashback
+
+### 🔔 Notificações e Alertas
+- **RF022**: Avisos de vencimento de faturas
+- **RF023**: Alertas de limites ultrapassados
+- **RF024**: Lembretes de pagamentos futuros
+- **RF025**: Notificações de metas atingidas
+
+### 📈 Relatórios e Análises
+- **RF026**: Geração de relatórios mensais
+- **RF027**: Exportação de dados (PDF, Excel)
+- **RF028**: Comparativos entre períodos
+- **RF029**: Análise de gastos por categoria
+- **RF030**: Relatórios de desempenho de metas
+
+## 📊 Requisitos Não Funcionais
+
+### 🔒 Segurança
+- **RNF001**: Criptografia de senhas com bcrypt
+- **RNF002**: Tokens JWT com expiração configurável
+- **RNF003**: Rate limiting para prevenir ataques
+- **RNF004**: Headers de segurança com Helmet
+- **RNF005**: Validação rigorosa de entrada de dados
+
+### ⚡ Performance
+- **RNF006**: Cache Redis para consultas frequentes
+- **RNF007**: Otimização de queries do banco de dados
+- **RNF008**: Paginação para listas grandes
+- **RNF009**: Compressão de respostas HTTP
+- **RNF010**: Connection pooling do PostgreSQL
+
+### 📏 Escalabilidade
+- **RNF011**: Arquitetura modular com separação de responsabilidades
+- **RNF012**: Padrão MVC com Services
+- **RNF013**: Configuração via variáveis de ambiente
+- **RNF014**: Logs estruturados para monitoramento
+- **RNF015**: Deployment containerizável
+
+### 🧪 Qualidade
+- **RNF016**: Cobertura de testes unitários
+- **RNF017**: Validação de tipos com TypeScript
+- **RNF018**: Documentação de API
+- **RNF019**: Padrões de código com ESLint
+- **RNF020**: Versionamento semântico
+
+## 🚀 Como Executar
+
+### Pré-requisitos
+- Node.js 18+
+- PostgreSQL 14+
+- Redis 6+
+
+### Instalação
+```bash
+# Clonar o repositório
+git clone <repository-url>
+
+# Navegar para a pasta do backend
+cd FinanControl
+
+# Instalar dependências
+npm install
+
+# Configurar variáveis de ambiente
+cp .env.example .env
+
+# Executar migrações do banco
+npm run migrate
+
+# Iniciar o servidor de desenvolvimento
+npm run dev
+```
+
+### Scripts Disponíveis
+```bash
+npm run dev      # Servidor de desenvolvimento
+npm run build    # Build para produção
+npm start        # Servidor de produção
+npm run test     # Executar testes
+npm run migrate  # Executar migrações
+```
+
+## 🛠️ Regras de Negócio (Backend)
+
+### 💰 Gestão de Valores e Cálculos
+- **RN001**: Valor disponível = Saldo + Limite de crédito - Gastos pendentes - Parcelas futuras
+- **RN002**: Faturas de cartão são calculadas considerando período de fechamento e vencimento
+- **RN003**: Parcelas são distribuídas automaticamente pelos meses subsequentes
+- **RN004**: Cashback é calculado automaticamente baseado no percentual do cartão
+- **RN005**: Saldos de contas correntes podem ser negativos até o limite autorizado
+- **RN006**: Limites de cartão de crédito não podem ser ultrapassados sem autorização
+
+### 🔄 Processamento de Transações
+- **RN007**: Transações recorrentes são processadas automaticamente na data programada
+- **RN008**: Falhas em transações recorrentes geram logs e notificações
+- **RN009**: Sistema verifica disponibilidade de saldo antes de processar débitos
+- **RN010**: Transferências entre contas são processadas atomicamente (tudo ou nada)
+- **RN011**: Parcelamentos no cartão são registrados como múltiplas parcelas
+- **RN012**: Juros de parcelamento são aplicados conforme configuração do cartão
+
+### 📊 Cálculos de Metas e Projeções
+- **RN013**: Metas de economia são avaliadas em tempo real a cada transação
+- **RN014**: Progresso de metas é calculado baseado no período definido (mensal/anual)
+- **RN015**: Projeção de fatura futura considera parcelas pendentes e gastos do período
+- **RN016**: Alertas de limite são disparados quando 80% do limite é atingido
+- **RN017**: Valor comprometido inclui parcelas futuras confirmadas
+
+### 🔔 Sistema de Notificações
+- **RN018**: Notificações são enviadas via Redis Queue para processamento assíncrono
+- **RN019**: Avisos de vencimento são enviados 7, 3 e 1 dia antes da data
+- **RN020**: Alertas de meta atingida são enviados imediatamente
+- **RN021**: Tentativas de reenvio de notificação falha são limitadas a 3x
+- **RN022**: Usuários podem configurar preferências de notificação
+
+### 🔐 Segurança e Validação
+- **RN023**: Todas as operações financeiras requerem autenticação JWT válida
+- **RN024**: Valores monetários são validados com precisão de 2 casas decimais
+- **RN025**: Operações críticas (exclusões, grandes transferências) requerem confirmação
+- **RN026**: Logs de auditoria são mantidos para todas as operações financeiras
+- **RN027**: Sessões expiram automaticamente após período de inatividade
+
+### 📈 Relatórios e Exportações
+- **RN028**: Relatórios incluem apenas dados do usuário autenticado
+- **RN029**: Dados são agregados por categoria, período e tipo de transação
+- **RN030**: Exportações mantêm formatação monetária e cálculos precisos
+- **RN031**: Comparativos consideram períodos equivalentes (mesmo número de dias)
+- **RN032**: Cache de relatórios complexos é mantido por 1 hora
+
+## 🔗 Endpoints Principais da API
+
+### 🔐 Autenticação
+```
+POST /api/auth/login          # Login de usuário
+POST /api/auth/register       # Registro de usuário
+POST /api/auth/forgot         # Recuperação de senha
+POST /api/token/refresh       # Renovar token JWT
+DELETE /api/auth/logout       # Logout (invalidar token)
+```
+
+### 👤 Usuários
+```
+GET  /api/usuarios/profile    # Perfil do usuário
+PUT  /api/usuarios/profile    # Atualizar perfil
+DELETE /api/usuarios/account  # Excluir conta
+GET  /api/usuarios/settings   # Configurações do usuário
+PUT  /api/usuarios/settings   # Atualizar configurações
+```
+
+### 💳 Cartões e Contas
+```
+GET  /api/cartoes             # Listar cartões
+POST /api/cartoes             # Criar cartão
+GET  /api/cartoes/:id         # Obter cartão
+PUT  /api/cartoes/:id         # Atualizar cartão
+DELETE /api/cartoes/:id       # Excluir cartão
+GET  /api/cartoes/:id/fatura  # Fatura atual do cartão
+
+GET  /api/contas              # Listar contas
+POST /api/contas              # Criar conta
+GET  /api/contas/:id          # Obter conta
+PUT  /api/contas/:id          # Atualizar conta
+DELETE /api/contas/:id        # Excluir conta
+GET  /api/contas/:id/saldo    # Saldo atual da conta
+```
+
+### 💰 Transações
+```
+GET  /api/despesas            # Listar despesas
+POST /api/despesas            # Criar despesa
+GET  /api/despesas/:id        # Obter despesa
+PUT  /api/despesas/:id        # Atualizar despesa
+DELETE /api/despesas/:id      # Excluir despesa
+GET  /api/despesas/categoria/:id # Despesas por categoria
+
+GET  /api/receitas            # Listar receitas
+POST /api/receitas            # Criar receita
+GET  /api/receitas/:id        # Obter receita
+PUT  /api/receitas/:id        # Atualizar receita
+DELETE /api/receitas/:id      # Excluir receita
+
+GET  /api/transferencias      # Listar transferências
+POST /api/transferencias      # Criar transferência
+GET  /api/transferencias/:id  # Obter transferência
+DELETE /api/transferencias/:id # Cancelar transferência
+```
+
+### 📊 Análises e Relatórios
+```
+GET  /api/faturas             # Listar faturas
+GET  /api/faturas/:id         # Obter fatura
+POST /api/faturas/:id/baixa   # Marcar fatura como paga
+GET  /api/faturas/:id/export  # Exportar fatura (PDF)
+
+GET  /api/metas               # Listar metas
+POST /api/metas               # Criar meta
+GET  /api/metas/:id           # Obter meta
+PUT  /api/metas/:id           # Atualizar meta
+DELETE /api/metas/:id         # Excluir meta
+GET  /api/metas/:id/progress  # Progresso da meta
+
+GET  /api/parcelas            # Listar parcelas pendentes
+GET  /api/parcelas/futuras    # Parcelas futuras (próximos meses)
+
+GET  /api/categorias          # Listar categorias
+POST /api/categorias          # Criar categoria
+PUT  /api/categorias/:id      # Atualizar categoria
+DELETE /api/categorias/:id    # Excluir categoria
+
+GET  /api/cashback            # Histórico de cashback
+GET  /api/cashback/total      # Total de cashback acumulado
+```
+
+### 🔔 Notificações e Configurações
+```
+GET  /api/notificacoes        # Listar notificações
+PUT  /api/notificacoes/:id/read # Marcar como lida
+DELETE /api/notificacoes/:id  # Excluir notificação
+POST /api/notificacoes/mark-all-read # Marcar todas como lidas
+
+GET  /api/settings            # Configurações do sistema
+PUT  /api/settings            # Atualizar configurações
+GET  /api/settings/notifications # Preferências de notificação
+PUT  /api/settings/notifications # Atualizar preferências
+
+GET  /api/transacoes-recorrentes # Listar transações recorrentes
+POST /api/transacoes-recorrentes # Criar transação recorrente
+PUT  /api/transacoes-recorrentes/:id # Atualizar transação recorrente
+DELETE /api/transacoes-recorrentes/:id # Excluir transação recorrente
+POST /api/transacoes-recorrentes/:id/pause # Pausar transação recorrente
+```
+
+## 📊 Modelo de Dados (Principais Entidades)
+
+```sql
+-- Usuários
+Usuario {
+  id: UUID PRIMARY KEY
+  nome: VARCHAR(100) NOT NULL
+  email: VARCHAR(100) UNIQUE NOT NULL
+  senha_hash: VARCHAR(255) NOT NULL
+  ativo: BOOLEAN DEFAULT TRUE
+  ultimo_acesso: TIMESTAMP
+  created_at: TIMESTAMP DEFAULT NOW()
+  updated_at: TIMESTAMP DEFAULT NOW()
+}
+
+-- Contas Bancárias
+Conta {
+  id: UUID PRIMARY KEY
+  usuario_id: UUID FK(Usuario.id) NOT NULL
+  nome: VARCHAR(100) NOT NULL
+  tipo: ENUM('corrente', 'poupanca', 'investimento') NOT NULL
+  banco: VARCHAR(100)
+  agencia: VARCHAR(10)
+  numero_conta: VARCHAR(20)
+  saldo_inicial: DECIMAL(10,2) DEFAULT 0
+  saldo_atual: DECIMAL(10,2) DEFAULT 0
+  limite_overdraft: DECIMAL(10,2) DEFAULT 0
+  ativa: BOOLEAN DEFAULT TRUE
+  cor: VARCHAR(7) -- Hex color
+  icone: VARCHAR(50)
+  created_at: TIMESTAMP DEFAULT NOW()
+  updated_at: TIMESTAMP DEFAULT NOW()
+}
+
+-- Cartões de Crédito
+Cartao {
+  id: UUID PRIMARY KEY
+  usuario_id: UUID FK(Usuario.id) NOT NULL
+  conta_id: UUID FK(Conta.id)
+  nome: VARCHAR(100) NOT NULL
+  bandeira: VARCHAR(50)
+  ultimos_digitos: VARCHAR(4)
+  limite_total: DECIMAL(10,2) NOT NULL
+  limite_disponivel: DECIMAL(10,2) NOT NULL
+  dia_fechamento: INTEGER CHECK (dia_fechamento BETWEEN 1 AND 28)
+  dia_vencimento: INTEGER CHECK (dia_vencimento BETWEEN 1 AND 28)
+  cashback_percentual: DECIMAL(3,2) DEFAULT 0
+  anuidade: DECIMAL(8,2) DEFAULT 0
+  ativo: BOOLEAN DEFAULT TRUE
+  cor: VARCHAR(7)
+  created_at: TIMESTAMP DEFAULT NOW()
+  updated_at: TIMESTAMP DEFAULT NOW()
+}
+
+-- Categorias
+Category {
+  id: UUID PRIMARY KEY
+  usuario_id: UUID FK(Usuario.id) NOT NULL
+  nome: VARCHAR(100) NOT NULL
+  tipo: ENUM('receita', 'despesa') NOT NULL
+  cor: VARCHAR(7)
+  icone: VARCHAR(50)
+  orcamento_mensal: DECIMAL(10,2) DEFAULT 0
+  ativa: BOOLEAN DEFAULT TRUE
+  created_at: TIMESTAMP DEFAULT NOW()
+}
+
+-- Transações Financeiras (Despesas)
+Despesa {
+  id: UUID PRIMARY KEY
+  usuario_id: UUID FK(Usuario.id) NOT NULL
+  conta_id: UUID FK(Conta.id)
+  cartao_id: UUID FK(Cartao.id)
+  categoria_id: UUID FK(Category.id) NOT NULL
+  valor: DECIMAL(10,2) NOT NULL
+  descricao: TEXT NOT NULL
+  observacoes: TEXT
+  data_transacao: DATE NOT NULL
+  forma_pagamento: ENUM('dinheiro', 'debito', 'credito', 'pix', 'transferencia') NOT NULL
+  status: ENUM('pendente', 'confirmada', 'cancelada') DEFAULT 'confirmada'
+  numero_parcelas: INTEGER DEFAULT 1
+  parcela_atual: INTEGER DEFAULT 1
+  recorrente_id: UUID FK(TransacoesRecorrentes.id)
+  comprovante_url: VARCHAR(500)
+  created_at: TIMESTAMP DEFAULT NOW()
+  updated_at: TIMESTAMP DEFAULT NOW()
+}
+
+-- Receitas
+Receita {
+  id: UUID PRIMARY KEY
+  usuario_id: UUID FK(Usuario.id) NOT NULL
+  conta_id: UUID FK(Conta.id) NOT NULL
+  categoria_id: UUID FK(Category.id) NOT NULL
+  valor: DECIMAL(10,2) NOT NULL
+  descricao: TEXT NOT NULL
+  observacoes: TEXT
+  data_transacao: DATE NOT NULL
+  fonte: VARCHAR(100)
+  status: ENUM('pendente', 'confirmada', 'cancelada') DEFAULT 'confirmada'
+  recorrente_id: UUID FK(TransacoesRecorrentes.id)
+  comprovante_url: VARCHAR(500)
+  created_at: TIMESTAMP DEFAULT NOW()
+  updated_at: TIMESTAMP DEFAULT NOW()
+}
+
+-- Metas Financeiras
+Meta {
+  id: UUID PRIMARY KEY
+  usuario_id: UUID FK(Usuario.id) NOT NULL
+  categoria_id: UUID FK(Category.id)
+  nome: VARCHAR(100) NOT NULL
+  tipo: ENUM('economia', 'gasto', 'receita') NOT NULL
+  valor_objetivo: DECIMAL(10,2) NOT NULL
+  valor_atual: DECIMAL(10,2) DEFAULT 0
+  periodo: ENUM('mensal', 'anual', 'personalizado') NOT NULL
+  data_inicio: DATE NOT NULL
+  data_fim: DATE NOT NULL
+  status: ENUM('ativa', 'pausada', 'finalizada') DEFAULT 'ativa'
+  notificar_progresso: BOOLEAN DEFAULT TRUE
+  created_at: TIMESTAMP DEFAULT NOW()
+  updated_at: TIMESTAMP DEFAULT NOW()
+}
+
+-- Faturas
+Fatura {
+  id: UUID PRIMARY KEY
+  cartao_id: UUID FK(Cartao.id) NOT NULL
+  mes_referencia: INTEGER NOT NULL
+  ano_referencia: INTEGER NOT NULL
+  data_fechamento: DATE NOT NULL
+  data_vencimento: DATE NOT NULL
+  valor_total: DECIMAL(10,2) NOT NULL
+  valor_pago: DECIMAL(10,2) DEFAULT 0
+  status: ENUM('aberta', 'fechada', 'vencida', 'paga') DEFAULT 'aberta'
+  data_pagamento: DATE
+  created_at: TIMESTAMP DEFAULT NOW()
+  updated_at: TIMESTAMP DEFAULT NOW()
+}
+
+-- Transações Recorrentes
+TransacoesRecorrentes {
+  id: UUID PRIMARY KEY
+  usuario_id: UUID FK(Usuario.id) NOT NULL
+  conta_id: UUID FK(Conta.id) NOT NULL
+  categoria_id: UUID FK(Category.id) NOT NULL
+  tipo: ENUM('receita', 'despesa') NOT NULL
+  nome: VARCHAR(100) NOT NULL
+  valor: DECIMAL(10,2) NOT NULL
+  frequencia: ENUM('diario', 'semanal', 'quinzenal', 'mensal', 'trimestral', 'semestral', 'anual') NOT NULL
+  dia_processamento: INTEGER
+  data_inicio: DATE NOT NULL
+  data_fim: DATE
+  proxima_execucao: DATE NOT NULL
+  status: ENUM('ativa', 'pausada', 'finalizada') DEFAULT 'ativa'
+  tentativas_falha: INTEGER DEFAULT 0
+  created_at: TIMESTAMP DEFAULT NOW()
+  updated_at: TIMESTAMP DEFAULT NOW()
+}
+
+-- Notificações
+Notificacao {
+  id: UUID PRIMARY KEY
+  usuario_id: UUID FK(Usuario.id) NOT NULL
+  tipo: ENUM('vencimento_fatura', 'limite_atingido', 'meta_atingida', 'transacao_recorrente') NOT NULL
+  titulo: VARCHAR(200) NOT NULL
+  mensagem: TEXT NOT NULL
+  lida: BOOLEAN DEFAULT FALSE
+  data_envio: TIMESTAMP DEFAULT NOW()
+  data_leitura: TIMESTAMP
+  dados_extras: JSONB -- Para armazenar dados específicos do tipo de notificação
+}
+
+-- Configurações do Usuário
+Setting {
+  id: UUID PRIMARY KEY
+  usuario_id: UUID FK(Usuario.id) NOT NULL
+  chave: VARCHAR(100) NOT NULL
+  valor: TEXT NOT NULL
+  tipo: ENUM('string', 'number', 'boolean', 'json') DEFAULT 'string'
+  created_at: TIMESTAMP DEFAULT NOW()
+  updated_at: TIMESTAMP DEFAULT NOW()
+  UNIQUE(usuario_id, chave)
+}
+
+-- Refresh Tokens
+RefreshToken {
+  id: UUID PRIMARY KEY
+  usuario_id: UUID FK(Usuario.id) NOT NULL
+  token_hash: VARCHAR(255) NOT NULL
+  dispositivo: VARCHAR(100)
+  ip_address: INET
+  user_agent: TEXT
+  expires_at: TIMESTAMP NOT NULL
+  created_at: TIMESTAMP DEFAULT NOW()
+}
+
+-- Cashback
+Cashback {
+  id: UUID PRIMARY KEY
+  usuario_id: UUID FK(Usuario.id) NOT NULL
+  cartao_id: UUID FK(Cartao.id) NOT NULL
+  despesa_id: UUID FK(Despesa.id) NOT NULL
+  valor_transacao: DECIMAL(10,2) NOT NULL
+  percentual: DECIMAL(3,2) NOT NULL
+  valor_cashback: DECIMAL(10,2) NOT NULL
+  data_transacao: DATE NOT NULL
+  data_credito: DATE
+  status: ENUM('pendente', 'creditado') DEFAULT 'pendente'
+  created_at: TIMESTAMP DEFAULT NOW()
+}
+```
 
 ## Registro de Gastos
 
@@ -383,16 +947,140 @@ O diagrama ER a seguir representa as principais entidades e relacionamentos do s
 
 > [Clique aqui para editar ou visualizar o diagrama no PlantText](https://www.planttext.com?text=hLVDZXCv4Bv7oZluWZYmit0bOX536b2adT5eVgIz8SUk9DQuxLwt6qt4y2vmGd3V9yYBRRdTITkEINg0M_kpNVxgSxcg-bLjgR5DASbReQYQQcMDbk_VNBu_qnpaUFIO8BOGoyRGpTVDVr2FHol1WJ1Xc8JngBuLggA6baGA1NPT0T76hlHuD1w1iiAkoKqDXdmSZmXv8lY4tDpC2ZTGj8G9kR96gAKRGqc5384LhLVXc1cW5lYfdP02Fwv52GvkAhuFVmhEFsLCDyfcA3J8R1QC7VtjYUJ52wS6HV-DGKj0df8BtLHKRRvI_9xgXO6NBzssELMtvuatT0cAhS-RSWucmZsP_OavbLGnj5404oML3XFr5Lr0ntz2NcijWQfM2oukm31mSBS12NTGWmEkoRIO_K7WRaAU_VcS_4MUFtlawVwiZbDg-00HEmzd1wuwrTbild5XDQfQRBxD_TUPgAtU4SRflqKfR2GF1iWKOsHEsMqiJWUc2hLpKjTuQa7N4p9Jra6yWN18cHKV83RuaugzkQj0rJ10D8RQ7X6HGysCgApGAWgeqWT7u6D5roKoE0DyXppG-MBsZmlSdDg5K2iGfXFSkULzyb4uKvWcf2mXYKBHurFFejDGu7inKCUqbBPGJyWrtDbV4JKWan4MlEI7j0rORv_XzkhtjMo38rHZBgGChLNK7H-8qgaVxchf1-_8mbARzO2ScDKe4s69oOm8JrYtf0T3Ew_HgmoVLBeIC-9g9zSQQA-TrIZgQIuOZ-ipmD5tckO8xh-Zr4k2XGaJHuRP0MUEqZdNLYm4deQlyO65fJqQwXehH0ZXYVnuqWavN09hZDj-RQYgNTfwC1TC2WNK5TIkeg4z49Rw591x2la4X6NmtyOLkz2es7mnmYMMAoph2gyE4pg699NUUjjrn140YYSXaRdAeRavAl_MKhOQdYuQ4tKX2o7XEhc-ffAQyaE7Ne6rJehZrt4Bwz3q1ogRXwK0ro8KK65P6zBY98K5x-eI5c0stnKJb6m-4zOsFQplRdAH45tK3-BYA77iJpA4Ozl6ZtOTpYF2VMWTQ6NYdiMt0WDoMoOKCgxxNgJuBGBC5DFbaExWbxe1VlHL3IdC8UystoooJVt2wF9qdwtL6V3t1zQsqx-_FpdH7tkU4_md4Kie3wt0m_35jlyjxGzBjwBR48Ek4uwHhWx7eAjPCHAMZNWcbypZ5LrAIS3-ySSJFhOoedZk2RXTdS0xhn8yEdKyQdyCkYdNICJ8paW8Rj-bsxxjadTSTktPtboVo_UcaaveRxu_CMmWF-cJa_lxZhMZsFLHFpAQBl1NdABvoqnNzLVq2eiV_eEFH_y3)
 
+## 🔄 Futuras Melhorias (Backend)
+
+### 📈 Integrações Avançadas
+- **Open Finance**: Conexão automática com bancos brasileiros via API
+- **MercadoPago Advanced**: Processamento completo de pagamentos e recebimentos
+- **Importação de Extratos**: Suporte automatizado para OFX, CSV e PDF
+- **API Banking**: Integração com APIs de múltiplos bancos e fintechs
+- **PIX Integration**: Processamento nativo de transações PIX
+- **Crypto Wallet**: Suporte para carteiras de criptomoedas
+
+### 🤖 Inteligência Artificial e Machine Learning
+- **ML para Categorização**: Classificação automática de transações baseada em histórico
+- **Análise Preditiva**: Previsão de gastos futuros usando modelos estatísticos
+- **Sugestões Inteligentes**: Recomendações personalizadas de economia e investimentos
+- **Detecção de Anomalias**: Identificação automática de gastos incomuns ou suspeitos
+- **OCR para Comprovantes**: Extração automática de dados de notas fiscais e recibos
+- **Chatbot Financeiro**: Assistente inteligente para consultas e operações
+
+### 🔧 Performance e Escalabilidade
+- **Microserviços**: Separação da aplicação em serviços menores e independentes
+- **Message Queue**: Sistema de filas com Redis/RabbitMQ para processamento assíncrono
+- **Database Sharding**: Particionamento horizontal para melhor performance
+- **CDN**: Distribuição de conteúdo estático e cache global
+- **Load Balancer**: Distribuição de carga entre múltiplas instâncias
+- **Auto Scaling**: Escalabilidade automática baseada na demanda
+
+### 📊 Analytics e Business Intelligence
+- **Data Warehouse**: Armazenamento otimizado para análises complexas
+- **ETL Pipeline**: Processamento e transformação de dados em lote
+- **Real-time Analytics**: Métricas e dashboard em tempo real
+- **Machine Learning Pipeline**: Modelos de ML para insights financeiros
+- **Data Lake**: Armazenamento de dados não estruturados
+- **Advanced Reporting**: Relatórios executivos e dashboards interativos
+
+### 🔒 Segurança Avançada
+- **OAuth 2.0**: Integração com provedores de identidade externos
+- **Multi-factor Authentication**: 2FA via SMS, email e aplicativos autenticadores
+- **Biometric Authentication**: Autenticação biométrica para operações sensíveis
+- **Audit Logs**: Rastreamento completo e imutável de todas as ações
+- **GDPR Compliance**: Conformidade completa com proteção de dados
+- **Zero Trust Architecture**: Verificação contínua de identidade e permissões
+
+### 🌐 Integrações de Sistema
+- **Webhook System**: Sistema completo de webhooks para eventos
+- **GraphQL API**: API GraphQL para consultas otimizadas
+- **gRPC Services**: Comunicação eficiente entre microserviços
+- **Event Sourcing**: Armazenamento de eventos para auditoria e replay
+- **CQRS Pattern**: Separação de comandos e consultas
+- **Saga Pattern**: Gerenciamento de transações distribuídas
+
+## 🧪 Testes e Qualidade
+
+### 📋 Estratégia de Testes
+- **Testes Unitários**: Jest + TypeScript para lógica de negócio
+- **Testes de Integração**: Supertest para endpoints da API
+- **Testes de Banco**: PostgreSQL em memória para testes isolados
+- **Testes de Performance**: Artillery para carga e stress
+- **Testes de Segurança**: OWASP ZAP para vulnerabilidades
+
+### 📊 Métricas de Qualidade
+- **Cobertura de Código**: Mínimo 80% para produção
+- **Code Quality**: SonarQube para análise estática
+- **Performance**: Tempo de resposta < 200ms para 95% das requisições
+- **Disponibilidade**: SLA de 99.9% uptime
+- **Logs**: Estruturados com Winston + ELK Stack
+
+## 🎯 Status do Projeto
+
+🚧 **Em Desenvolvimento Ativo**
+
+### ✅ Funcionalidades Implementadas
+- **Autenticação**: Sistema completo JWT + Refresh Tokens
+- **CRUD Básico**: Usuários, contas, cartões, transações
+- **Cálculos Financeiros**: Saldos, limites, valor disponível
+- **Sistema de Parcelas**: Gestão completa de parcelamentos
+- **Validação**: Schemas Zod para todos endpoints
+- **Cache**: Redis para otimização de consultas
+- **Segurança**: Rate limiting, CORS, Helmet
+
+### 🔄 Em Desenvolvimento
+- **Sistema de Notificações**: Push notifications e email
+- **Relatórios Avançados**: Exportação PDF/Excel
+- **Transações Recorrentes**: Processamento automático
+- **Sistema de Metas**: Acompanhamento e alertas
+- **Integração MercadoPago**: Pagamentos e recebimentos
+- **Testes Automatizados**: Cobertura completa
+
+### 📋 Próximas Sprints
+1. **Sprint 15**: Finalização do sistema de notificações
+2. **Sprint 16**: Relatórios e exportações
+3. **Sprint 17**: Dashboard de analytics
+4. **Sprint 18**: Testes e documentação
+5. **Sprint 19**: Integração com Open Finance
+6. **Sprint 20**: Deploy e monitoramento
+
+### 🎯 Roadmap 2024
+- **Q1**: Finalização MVP + Testes
+- **Q2**: Integrações bancárias
+- **Q3**: ML e IA features  
+- **Q4**: Mobile app + Scale
+
 ---
 
-## Tecnologias utilizadas:
+## 📞 Suporte e Contribuição
 
-- **Node.js**: com Express para gerenciamento de rotas, bcrypt para autenticação de senhas e jsonwebtoken (JWT) para proteção e autenticação da API.
-- **Sequelize**: utilizado como ORM para comunicação com o banco de dados.
-- **Zod**: para definição e validação de schemas.
-- **PostgreSQL**: banco de dados principal.
-- **Railway**: hospedagem do banco e do servidor.
-- **Postman**: para realização de testes.
-- **GitHub**: repositório de versionamento do código.
+### 🤝 Como Contribuir
+1. **Fork** o repositório
+2. **Clone** sua fork localmente
+3. **Crie** uma branch para sua feature
+4. **Implemente** seguindo os padrões do projeto
+5. **Teste** suas alterações
+6. **Documente** as mudanças
+7. **Abra** um Pull Request
+
+### 📋 Padrões de Código
+- **TypeScript**: Tipagem estrita obrigatória
+- **ESLint**: Configuração padrão do projeto
+- **Prettier**: Formatação automática
+- **Conventional Commits**: Padrão para mensagens
+- **Testes**: Obrigatórios para novas funcionalidades
+
+### 🐛 Reportar Issues
+- **Template**: Use o template de issue do GitHub
+- **Logs**: Inclua logs relevantes (sem dados sensíveis)
+- **Reprodução**: Passos claros para reproduzir
+- **Ambiente**: Versões de Node.js, PostgreSQL, etc.
+
+### 📧 Contato
+- **Issues**: Para bugs e feature requests
+- **Discussions**: Para perguntas gerais
+- **Email**: Para questões de segurança
 
 ---
+
+**Desenvolvido com ❤️ usando Node.js, TypeScript e PostgreSQL**
+
+**Licença**: MIT - Consulte LICENSE.md para detalhes
